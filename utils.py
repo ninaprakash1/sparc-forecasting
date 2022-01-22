@@ -16,9 +16,17 @@ def plot_loss_curve(train_losses, val_losses, model_output):
     plt.legend(['Train','Validation'])
     plt.savefig(os.path.join(model_output,"loss_curve.png"))
 
-def log_progress(text, path):
-    with open(path,'a+') as file:
-        file.write(text + '\n')
+def log_progress(text, model_output):
+    if not os.path.exists(model_output):
+        print("[INFO] Checkpoint Directory does not exist! Making directory {}".format(model_output))
+        os.mkdir(model_output)
+    path = os.path.join(model_output,'log.txt')
+    if not os.path.exists(path):
+        with open(path,'w') as file:
+            file.write(text + '\n')
+    else:
+        with open(path,'a+') as file:
+            file.write(text + '\n')
     print(text)
 
 # Note: The following function was sourced from Stanford CS 230's Computer

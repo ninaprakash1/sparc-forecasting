@@ -1,0 +1,12 @@
+[MODEL INFO] Training with 10 epochs, lr=0.01
+[INFO] Training Epoch 1/10
+[INFO] Training Epoch 2/10
+[INFO] Training Epoch 3/10
+[INFO] Training Epoch 4/10
+[INFO] Training Epoch 5/10
+[INFO] Training Epoch 6/10
+[INFO] Training Epoch 7/10
+[INFO] Training Epoch 8/10
+[INFO] Training Epoch 9/10
+[INFO] Training Epoch 10/10
+[INFO] Training runtime: 1.87s

@@ -18,7 +18,7 @@ parser.add_argument("-lr","--learning_rate", type=float, help="Learning Rate")
 
 # Example: $ python train.py -d data -o saved_models/benchmark -e 50 -lr 0.01
 
-def train(model, loss_fn, optimizer, X_train, y_train, X_val, y_val, num_epochs, model_output, log_path):
+def train(model, loss_fn, optimizer, X_train, y_train, X_val, y_val, num_epochs, model_output):
 
     best_val_loss = np.Inf
 
@@ -27,7 +27,7 @@ def train(model, loss_fn, optimizer, X_train, y_train, X_val, y_val, num_epochs,
     t0 = time.time()
     for epoch in range(num_epochs):
 
-        utils.log_progress('[INFO] Training Epoch {}/{}'.format(epoch + 1, num_epochs), log_path)
+        utils.log_progress('[INFO] Training Epoch {}/{}'.format(epoch + 1, num_epochs), model_output)
 
         # get predictions and compute loss
         pred = model(X_train.float())
@@ -49,7 +49,7 @@ def train(model, loss_fn, optimizer, X_train, y_train, X_val, y_val, num_epochs,
         is_best = val_loss < best_val_loss
         utils.save_checkpoint(model.state_dict(), is_best, model_output)
 
-    utils.log_progress('[INFO] Training runtime: %0.2fs' %(time.time() - t0), log_path)
+    utils.log_progress('[INFO] Training runtime: %0.2fs' %(time.time() - t0), model_output)
 
     # plot learning curve
     utils.plot_loss_curve(train_losses, val_losses, model_output)
@@ -84,8 +84,10 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(),lr=lr)
 
     log_path = os.path.join(args.model_output, "log.txt")
+    print(log_path)
     if (os.path.exists(log_path)):
         os.remove(log_path)
 
     # run training
-    train(model, loss_fn, optimizer, X_train, y_train, X_val, y_val, num_epochs, args.model_output, log_path)
+    utils.log_progress('[MODEL INFO] Training with {} epochs, lr={}'.format(num_epochs,lr), args.model_output)
+    train(model, loss_fn, optimizer, X_train, y_train, X_val, y_val, num_epochs, args.model_output)
