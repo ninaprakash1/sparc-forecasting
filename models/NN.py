@@ -18,7 +18,11 @@ class NeuralNet(nn.Module):
             nn.ReLU(),
 
             # Layer 3
-            nn.Linear(in_features=128, out_features=out_size),
+            nn.Linear(in_features=128, out_features=256),
+            nn.ReLU(),
+
+            # Layer 4
+            nn.Linear(in_features=256, out_features=out_size)
         )
 
     def forward(self, x):
