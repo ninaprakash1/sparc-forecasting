@@ -15,8 +15,8 @@ upscaling_speed: 1.0
 # and opens all the necessary ports to support the Ray cluster.
 # Empty string means disabled.
 docker:
-  image: "rayproject/ray-ml:latest-cpu" # You can change this to latest-cpu if you don't need GPU support and want a faster startup
-    # image: rayproject/ray:latest-gpu   # use this one if you don't need ML dependencies, it's faster to pull
+  image: "rayproject/ray:latest-cpu" # You can change this to latest-cpu if you don't need GPU support and want a faster startup
+    # image: rayproject/ray-ml:latest-gpu   # use this one if you need ML dependencies
   container_name: "ray_container"
   # If true, pulls latest version of image. Otherwise, `docker run` will only pull the image
   # if no cached version is present.
@@ -39,7 +39,7 @@ provider:
     type: gcp
     region: us-west1
     availability_zone: us-west1-a
-    project_id: "cs329s-project" ##########
+    project_id: "plenary-utility-303922" ##########
 
 # How Ray will authenticate with newly launched nodes.
 auth:
@@ -56,7 +56,7 @@ auth:
 available_node_types:
     ray_head_default:
         # The resources provided by this node type.
-        resources: {"CPU": 2}
+        resources: {"CPU": 2}   # Edit this in combination with machineType bwloe
         # Provider-specific config for the head node, e.g. instance type. By default
         # Ray will auto-configure unspecified fields such as subnets and ssh-keys.
         # For more documentation on available fields, see:
@@ -167,7 +167,7 @@ setup_commands: []
 
 # Custom commands that will be run on the head node after common setup.
 head_setup_commands:
-  - pip install google-api-python-client==1.7.8
+  - pip install google-api-python-client==1.7.8 scikit-learn
 
 # Custom commands that will be run on worker nodes after common setup.
 worker_setup_commands: []
