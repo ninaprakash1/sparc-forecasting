@@ -1,0 +1,6 @@
+ray[serve]
+transformers
+torch
+scikit-learn
+pandas
+numpy
