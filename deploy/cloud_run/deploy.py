@@ -1,6 +1,7 @@
 import os
 import time
 import pickle
+import logging
 
 from fastapi import FastAPI
 # from transformers import pipeline
@@ -12,7 +13,9 @@ from ray import serve
 app = FastAPI()
 
 
-MODEL_NAME = ""
+logging.getLogger("Ray")
+
+MODEL_NAME = "model.sav"
 
 
 class Request(BaseModel):
@@ -24,12 +27,13 @@ class Request(BaseModel):
 @serve.ingress(app)
 class Model:
     def __init__(self):
-        self.model = pickle.load(MODEL_NAME)
+        self.model = pickle.load(open(MODEL_NAME, 'rb'))
 
     @app.post("/")
     def predict(self, payload: Request):
         feature_vec = payload.data
-        preds = self.model.predict(feature_vec)
+        logging.info(f"Recieved data: {feature_vec}")
+        preds = self.model.predict(1)
         return preds
 
 ray.init(_node_ip_address="0.0.0.0") # needed for gcloud container compatibility
