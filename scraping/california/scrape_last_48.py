@@ -6,11 +6,11 @@ from pytz import timezone
 from io import StringIO
 import pandas as pd
 from tqdm import tqdm
+import time
 
 def get_day_strings():
     
     today = datetime.now(timezone('US/Pacific'))
-    year, month, day = today.year, today.month, today.day
     
     day_strings = []
     day_strings.append(str(today.year) + ('0' + str(today.month))[-2:] + ('0' + str(today.day))[-2:])
@@ -18,7 +18,6 @@ def get_day_strings():
     hours_remaining = 48 - today.hour - 1
     while (hours_remaining > 0):
         yesterday = today - timedelta(days=1)
-        year, month, day = today.year, today.month, today.day
         day_strings.append(str(yesterday.year) + ('0' + str(yesterday.month))[-2:] + ('0' + str(yesterday.day))[-2:])
         hours_remaining -= 24
         today = yesterday
