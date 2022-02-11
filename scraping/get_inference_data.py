@@ -33,7 +33,7 @@ def get_day_strings(n):
         today = yesterday
     start_date = ('0' + str(today.day))[-2:] + '-' + today.strftime("%b").upper() + '-' + str(today.year)
         
-    return day_strings, start_date, end_date
+    return day_strings[::-1], start_date, end_date
 
 def get_suppy_data(day):
     """
@@ -69,7 +69,7 @@ def get_genmix_data(day_strings, n):
         time.sleep(0.1)
         
     # 3. Filter only last n * 24 hours
-    genmix_data = all_df.head(int(n * 24 * 60 / 5))
+    genmix_data = all_df.tail(int(n * 24 * 60 / 5))
     return genmix_data
 
 def merge_data(genmix_data, weather_data):
@@ -122,4 +122,5 @@ def get_last_n_days(n):
     # 4. Merge genmix and weather data
     last_n_days = merge_data(genmix_data, weather_data)
     
+    last_n_days.to_csv('temp.csv')
     return last_n_days
