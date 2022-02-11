@@ -2,32 +2,52 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
+from scraping.get_inference_data import get_last_n_days
+from inference import predict
+import matplotlib.dates as mdates
 
 ###
 # Testing Data Plotting
 ###
-data_url = "data/y_test_california_2020-2021.csv"
+# data_url = "data/y_test_california_2020-2021.csv"
 
-data = pd.read_csv(data_url)
-most_recent_day = data.iloc[-1]
+# data = pd.read_csv(data_url)
+# most_recent_day = data.iloc[-1]
 
 genmix_vars = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas', 'Small hydro',
-    'Coal', 'Nuclear', 'Batteries', 'Imports', 'Other', 'Natural Gas',
-    'Large Hydro']
+    'Coal', 'Nuclear', 'Batteries', 'Imports', 'Natural Gas',
+    'Large Hydro'] # 'Other'
 
-fig, ax = plt.subplots(figsize=(16,8))
-for source_indx, source in enumerate(genmix_vars):
-    # Plot the true values
-    values = []
-    for i in range(24):
-        col_val = source + '_' + str(i)
-        val = most_recent_day[col_val]
-        values.append(val)
-    ax.plot(range(24),values)
+colors = ['green','gray','brown','purple','orange','red','yellow','black','blue','pink','teal','lawngreen']
+
+# fig, ax = plt.subplots(figsize=(16,8))
+# for source_indx, source in enumerate(genmix_vars):
+#     # Plot the true values
+#     values = []
+#     for i in range(24):
+#         col_val = source + '_' + str(i)
+#         val = most_recent_day[col_val]
+#         values.append(val)
+#     ax.plot(range(24),values)
     
-ax.legend(genmix_vars,loc='right')
-ax.set_xlabel('Hour')
-ax.set_ylabel('kWh')
+# ax.legend(genmix_vars,loc='right')
+# ax.set_xlabel('Hour')
+# ax.set_ylabel('kWh')
+
+data2 = get_last_n_days(1)
+fig2, ax2 = plt.subplots(figsize=(16,8))
+for source_indx, source in enumerate(genmix_vars):
+    ax2.plot(data2['date_time_5min'], data2[source], c=colors[source_indx])
+ax2.set_xlabel('Time')
+ax2.set_ylabel('kWh')
+ax2.legend(genmix_vars,loc='right')
+
+myFmt = mdates.DateFormatter('%h-%d %I:%M%p')
+ax2.xaxis.set_major_formatter(myFmt)
+
+pred = predict()
+
+ax2.plot(pred)
 
 ###
 # Testing fonts
@@ -108,6 +128,6 @@ if (clicked_generate):
 
     with st.expander("Click to see the forecast results"):
         st.subheader('The forecasted generation mix for {}'.format(day.lower()))
-        st.pyplot(fig)
+        st.pyplot(fig2)
 
 clicked_generate = False
