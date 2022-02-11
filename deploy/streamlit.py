@@ -15,8 +15,9 @@ STYLES = {
 }
 
 
-st.write("GCP username:", st.secrets["db_username"])
-st.write("GCP password:", st.secrets["db_password"])
+st.write("GCP url:", st.secrets["api_url"])
+st.write("GCP username:", st.secrets["api_username"])
+st.write("GCP password:", st.secrets["api_password"])
 st.write("My cool secrets:", st.secrets["my_cool_secrets"]["things_i_like"])
 
 # And the root-level secrets are also accessible as environment variables:
