@@ -45,34 +45,7 @@ ax2.legend(genmix_vars,loc='right')
 myFmt = mdates.DateFormatter('%h-%d %I:%M%p')
 ax2.xaxis.set_major_formatter(myFmt)
 
-pred = predict()
-
-ax2.plot(pred)
-
-###
-# Testing fonts
-###
-
-# st.markdown(
-#         """
-#         <style>
-# @font-face {
-#   font-family: 'Montserrat';
-#   font-style: normal;
-#   font-weight: 400;
-#   src: url(https://fonts.gstatic.com/s/quicksand/v24/6xK-dSZaM9iE8KbpRA_LJ3z8mH9BOJvgkP8o58a-wg.woff2) format('woff2');
-#   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-# }
-
-#     html, body, [class*="css"]  {
-#     font-family: 'Montserrat';
-#     font-size: 48px;
-#     }
-#     </style>
-
-#     """,
-#         unsafe_allow_html=True,
-#     )
+# pred = predict()
 
 ###
 # Main app components

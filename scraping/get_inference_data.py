@@ -122,5 +122,4 @@ def get_last_n_days(n):
     # 4. Merge genmix and weather data
     last_n_days = merge_data(genmix_data, weather_data)
     
-    last_n_days.to_csv('temp.csv')
     return last_n_days
