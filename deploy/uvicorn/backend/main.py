@@ -6,8 +6,7 @@ from fastapi import FastAPI
 from fastapi import UploadFile
 import numpy as np
 
-import config
-import inference
+from inference import predict
 
 
 app = FastAPI()
@@ -16,6 +15,11 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     return {"message": "Welcome from the API"}
+
+
+@app.get("/echo/{message}")
+def read_root(message: str):
+    return {"message": f"{message}"}
 
 
 @app.post("/{get_info}")
