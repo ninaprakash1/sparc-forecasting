@@ -91,6 +91,10 @@ def merge_data(genmix_data, weather_data):
     genmix['date_time_hourly'] = genmix.date_time_5min.dt.floor('h')
     genmix = genmix[['date_time_hourly','date_time_5min','Solar','Wind','Geothermal','Biomass','Biogas','Small hydro','Coal','Nuclear','Batteries','Imports','Other','Natural Gas','Large Hydro']]
 
+    # Define weather columns to keep
+    weather_cols = ['date_time_hourly','tempC', 'uvIndex','WindGustKmph','cloudcover','humidity','precipMM']
+    weather = weather[weather_cols]
+
     # Join data by datetime
     full_data = genmix.merge(weather.set_index('date_time_hourly'),on='date_time_hourly',how='inner')
 
