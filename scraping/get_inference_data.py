@@ -90,14 +90,10 @@ def merge_data(genmix_data, weather_data):
     genmix.date_time_5min = pd.to_datetime(genmix.date_time_5min)
     genmix['date_time_hourly'] = genmix.date_time_5min.dt.floor('h')
     genmix = genmix[['date_time_hourly','date_time_5min','Solar','Wind','Geothermal','Biomass','Biogas','Small hydro','Coal','Nuclear','Batteries','Imports','Other','Natural Gas','Large Hydro']]
-    # genmix_hourly = genmix.groupby('date_time_hourly').mean()
 
     # Join data by datetime
-    # full_data = genmix_hourly.join(weather.set_index('date_time_hourly'),on='date_time_hourly',how='outer')
-    # full_data = weather.join(genmix.set_index('date_time_hourly'),on='date_time_hourly',how='outer')
     full_data = genmix.merge(weather.set_index('date_time_hourly'),on='date_time_hourly',how='inner')
 
-    # Reset timestamp to 5-min frequency
     return full_data
 
 def get_last_n_days(n):
