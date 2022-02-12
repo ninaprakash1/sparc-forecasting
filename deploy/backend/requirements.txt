@@ -1,3 +1,5 @@
 uvicorn
 fastapi
 numpy
+pandas
+skforecast
