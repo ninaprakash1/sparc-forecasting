@@ -16,5 +16,5 @@ steps:
    - 'gcr.io/$PROJECT_ID/sparc-cloudrun:$COMMIT_SHA'
    - '--region'
    - 'us-west-1'
- images:
+images:
  - 'gcr.io/$PROJECT_ID/:$COMMIT_SHA'
