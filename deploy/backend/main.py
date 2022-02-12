@@ -21,6 +21,10 @@ def read_root():
 def read_root(message: str):
     return {"message": f"{message}"}
 
+@app.get("/predict")
+def get_prediction():
+    return {"result": predict()}
+
 
 @app.post("/{get_info}")
 def get_image(get_info: str):

@@ -1,3 +1,4 @@
+from numpy import source
 import pandas as pd
 import torch
 import matplotlib.pyplot as plt
@@ -5,13 +6,18 @@ import os
 import shutil
 from scraping.get_inference_data import get_last_n_days
 import matplotlib.dates as mdates
+from deploy.backend.inference import predict
 
-def generate_graph_forecasted(pred):
+def generate_graph_forecasted():
+    results = predict()
     fig3, ax3 = plt.subplots(figsize=(16,8))
-    ax3.plot(range(len(pred)),pred)
+    for source_type in results:
+        lst = results[source_type].tolist()
+        ax3.plot(range(len(lst)), lst)
     ax3.set_title('Forecasted Generation Mix for Next 24 hours')
-    ax3.set_xlabel('Hour')
+    ax3.set_xlabel('Hours from Now')
     ax3.set_ylabel('kWh')
+    ax3.legend(results.keys())
 
     return fig3
 
