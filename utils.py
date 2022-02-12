@@ -3,6 +3,56 @@ import torch
 import matplotlib.pyplot as plt
 import os
 import shutil
+from scraping.get_inference_data import get_last_n_days
+import matplotlib.dates as mdates
+
+def generate_graph_forecasted(pred):
+    fig3, ax3 = plt.subplots(figsize=(16,8))
+    ax3.plot(range(len(pred)),pred)
+    ax3.set_title('Forecasted Generation Mix for Next 24 hours')
+    ax3.set_xlabel('Hour')
+    ax3.set_ylabel('kWh')
+
+    return fig3
+
+def generate_graph_historical():
+    genmix_vars = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas', 'Small hydro',
+        'Coal', 'Nuclear', 'Batteries', 'Imports', 'Natural Gas',
+        'Large Hydro'] # 'Other'
+
+    colors = ['green','gray','brown','purple','orange','red','yellow','black','blue','pink','teal','lawngreen']
+
+    data2 = get_last_n_days(1)
+    fig2, ax2 = plt.subplots(figsize=(16,8))
+    for source_indx, source in enumerate(genmix_vars):
+        ax2.plot(data2['date_time_5min'], data2[source], c=colors[source_indx])
+    ax2.set_xlabel('Time')
+    ax2.set_ylabel('kWh')
+    ax2.legend(genmix_vars,loc='right')
+
+    myFmt = mdates.DateFormatter('%h-%d %I:%M%p')
+    ax2.xaxis.set_major_formatter(myFmt)
+
+    # data_url = "data/y_test_california_2020-2021.csv"
+
+    # data = pd.read_csv(data_url)
+    # most_recent_day = data.iloc[-1]
+
+    # fig, ax = plt.subplots(figsize=(16,8))
+    # for source_indx, source in enumerate(genmix_vars):
+    #     # Plot the true values
+    #     values = []
+    #     for i in range(24):
+    #         col_val = source + '_' + str(i)
+    #         val = most_recent_day[col_val]
+    #         values.append(val)
+    #     ax.plot(range(24),values)
+        
+    # ax.legend(genmix_vars,loc='right')
+    # ax.set_xlabel('Hour')
+    # ax.set_ylabel('kWh')
+
+    return fig2
 
 def load_data(filename,index_col=0):
     return torch.tensor(pd.read_csv(filename,index_col=[index_col]).values)
