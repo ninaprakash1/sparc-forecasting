@@ -2,11 +2,8 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
-from scraping.get_inference_data import get_last_n_days
-from deploy.backend.inference import predict
 from utils import generate_graph_historical, generate_graph_forecasted
 import requests
-
 
 ###
 # Main app components
@@ -63,8 +60,7 @@ if (clicked_generate):
     st.markdown(pred_alignment, unsafe_allow_html=True)
 
     fig2 = generate_graph_historical()
-    pred = predict()
-    fig3 = generate_graph_forecasted(pred)
+    fig3 = generate_graph_forecasted()
 
     with st.expander("Click to see the forecast results"):
         st.subheader('Generation mix for last 24 hours')
