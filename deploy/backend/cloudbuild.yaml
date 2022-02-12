@@ -1,9 +1,13 @@
 steps:
  # Build the container image
  - name: 'gcr.io/cloud-builders/docker'
-   args: ['build', '-t', 'gcr.io/$PROJECT_ID/sparc-cloudrun:$COMMIT_SHA', '-file', './deploy/backend/']
+   args:
+   - 'build'
+   - '--tag=gcr.io/$PROJECT_ID/sparc-cloudrun:$COMMIT_SHA'
+   - '--file=./deploy/backend/'
+   - .
  # Push the container image to Container Registry
- - name: 'gcr.io/cloud-builders/docker'
+ - name: 'gcr.io/cloud-builder:wqs/docker'
    args: ['push', 'gcr.io/$PROJECT_ID/sparc-cloudrun:$COMMIT_SHA']
  # Deploy container image to Cloud Run
  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
