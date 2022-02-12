@@ -3,57 +3,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import time
 from scraping.get_inference_data import get_last_n_days
-from inference import predict
-import matplotlib.dates as mdates
+from deploy.backend.inference import predict
+from utils import generate_graph_historical, generate_graph_forecasted
+import requests
 
-###
-# Testing Data Plotting
-###
-# data_url = "data/y_test_california_2020-2021.csv"
-
-# data = pd.read_csv(data_url)
-# most_recent_day = data.iloc[-1]
-
-genmix_vars = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas', 'Small hydro',
-    'Coal', 'Nuclear', 'Batteries', 'Imports', 'Natural Gas',
-    'Large Hydro'] # 'Other'
-
-colors = ['green','gray','brown','purple','orange','red','yellow','black','blue','pink','teal','lawngreen']
-
-# fig, ax = plt.subplots(figsize=(16,8))
-# for source_indx, source in enumerate(genmix_vars):
-#     # Plot the true values
-#     values = []
-#     for i in range(24):
-#         col_val = source + '_' + str(i)
-#         val = most_recent_day[col_val]
-#         values.append(val)
-#     ax.plot(range(24),values)
-    
-# ax.legend(genmix_vars,loc='right')
-# ax.set_xlabel('Hour')
-# ax.set_ylabel('kWh')
-
-data2 = get_last_n_days(1)
-fig2, ax2 = plt.subplots(figsize=(16,8))
-for source_indx, source in enumerate(genmix_vars):
-    ax2.plot(data2['date_time_5min'], data2[source], c=colors[source_indx])
-ax2.set_xlabel('Time')
-ax2.set_ylabel('kWh')
-ax2.legend(genmix_vars,loc='right')
-
-myFmt = mdates.DateFormatter('%h-%d %I:%M%p')
-ax2.xaxis.set_major_formatter(myFmt)
-
-# pred = predict()
 
 ###
 # Main app components
 ###
 
-earth_img = "https://purepng.com/public/uploads/large/purepng.com-earthearthplanetglobethird-planet-from-the-sun-1411526987612f5l5p.png"
-tree_img = "https://www.pinclipart.com/picdir/middle/0-1348_leaves-clipart-mango-tree-clipart-tree-png-transparent.png"
 energy_img = "https://www.pinclipart.com/picdir/big/105-1057895_green-my-life-app-eliminates-the-carbon-footprint.png"
+earth_img = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSx-MftU146rqnu3qXiH1-PvbhqkBtqxln3nA&usqp=CAU"
 
 # Set page title and favicon.
 st.set_page_config(
@@ -62,14 +22,17 @@ st.set_page_config(
 
 st.image(energy_img)
 
+# res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/echo/something")
+# st.title(res.text)
+
 st.title('SPARC')
 st.header('{ Save Power and Reduce Carbon }')
 st.sidebar.markdown("## About SPARC California")
 st.sidebar.markdown("Welcome to SPARC California! This app allows you to see the carbon emissions of common daily activities for the next few days.")
 
 # User Input
-day = st.selectbox("Select a day", ["Today","Tomorrow", "Day After Tomorrow"])
-hour = st.selectbox("Select a time",
+# day = st.selectbox("Select a day", ["Today","Tomorrow", "Day After Tomorrow"])
+hour = st.selectbox("Select a time in the next 24 hours",
                     ['12:00am'] + [str(h) + ':00am' for h in range(1,12)] + ['12:00pm'] + [str(h) + ':00pm' for h in range(1,12)],
                     index=13)
 activity = st.selectbox("Select an activity", ["Charge an EV", "Run a load of laundry","Take a hot shower"])
@@ -81,12 +44,12 @@ if (clicked_generate):
 
     with st.empty():
         for seconds in range(2):
-            st.write(f"Gathering prediction...⏳ {seconds} seconds have passed")
-            time.sleep(1)
+            st.write(f"Gathering prediction...")
+            time.sleep(.05)
         st.write("✔️ Complete!")
 
     # Write output
-    st.subheader('To {} at {} {}, you will produce: '.format(activity[0].lower() + activity[1:], hour, day.lower()))
+    st.subheader('To {} at {}, you will produce: '.format(activity[0].lower() + activity[1:], hour))
 
     st.subheader('__ g CO2',anchor='prediction')
 
@@ -99,8 +62,15 @@ if (clicked_generate):
     """
     st.markdown(pred_alignment, unsafe_allow_html=True)
 
+    fig2 = generate_graph_historical()
+    pred = predict()
+    fig3 = generate_graph_forecasted(pred)
+
     with st.expander("Click to see the forecast results"):
-        st.subheader('The forecasted generation mix for {}'.format(day.lower()))
+        st.subheader('Generation mix for last 24 hours')
         st.pyplot(fig2)
+
+        st.subheader('Forecasted generation mix for next 24 hours')
+        st.pyplot(fig3)
 
 clicked_generate = False
