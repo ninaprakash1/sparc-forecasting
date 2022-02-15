@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import time
-from utils import generate_graph_historical, generate_graph_forecasted
+from utils import generate_graph_historical_and_forecasted, generate_graph_forecasted, compute_co2
 import requests
 
 ###
@@ -25,10 +25,13 @@ st.image(energy_img)
 st.title('SPARC')
 st.header('{ Save Power and Reduce Carbon }')
 st.sidebar.markdown("## About SPARC California")
-st.sidebar.markdown("Welcome to SPARC California! This app allows you to see the carbon emissions of common daily activities for the next few days.")
+st.sidebar.markdown("Welcome to SPARC California! This app allows you to see the forecasted carbon emissions of common daily activities.")
+st.sidebar.markdown("At any moment, the electricity that we use from the grid comes from a mix of many sources, from natural gas to solar to nuclear depending on resource availability, weather, time, day, and season. The more nonrenewable resources are used to provide energy to the grid, the more CO2 emissions are produced.")
+st.sidebar.markdown("If we can predict how much CO2 we are producing at a given time, we can adjust our behavior to reduce emissions!")
+st.sidebar.markdown("")
+st.sidebar.markdown("*Kun Guo, Nina Prakash, Griffin Schillinger Tarpenning | Stanford University | CS 329s*")
 
 # User Input
-# day = st.selectbox("Select a day", ["Today","Tomorrow", "Day After Tomorrow"])
 hour = st.selectbox("Select a time in the next 24 hours",
                     ['12:00am'] + [str(h) + ':00am' for h in range(1,12)] + ['12:00pm'] + [str(h) + ':00pm' for h in range(1,12)],
                     index=13)
@@ -40,33 +43,33 @@ if (clicked_generate):
     # Make call to model
 
     with st.empty():
-        for seconds in range(2):
-            st.write(f"Gathering prediction...")
-            time.sleep(.05)
-        st.write("✔️ Complete!")
+        st.write(f"Gathering prediction...")
+        results, fig2, fig3 = generate_graph_historical_and_forecasted()
+        co2 = compute_co2(results, activity, hour)
+        st.success('Model run complete')
 
     # Write output
     st.subheader('To {} at {}, you will produce: '.format(activity[0].lower() + activity[1:], hour))
 
-    st.subheader('__ g CO2',anchor='prediction')
+    st.header('%.1f lb CO2' %(co2),anchor='prediction')
 
     pred_alignment = """
     <style>
     #prediction {
     text-align: center
     }
+    #prediction {
+    color: green
+    }
     </style>
     """
     st.markdown(pred_alignment, unsafe_allow_html=True)
 
-    fig2 = generate_graph_historical()
-    fig3 = generate_graph_forecasted()
-
     with st.expander("Click to see the forecast results"):
-        st.subheader('Generation mix for last 24 hours')
+        st.subheader('Historical and Predicted Generation Mix')
         st.pyplot(fig2)
 
-        st.subheader('Forecasted generation mix for next 24 hours')
+        st.subheader('Historical (Detailed) and Predicted Generation Mix')
         st.pyplot(fig3)
 
 clicked_generate = False
