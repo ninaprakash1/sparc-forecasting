@@ -61,6 +61,9 @@ if (clicked_generate):
     """
     st.markdown(pred_alignment, unsafe_allow_html=True)
 
+    fig2 = generate_graph_historical()
+    fig3 = generate_graph_forecasted()
+
     with st.expander("Click to see the forecast results"):
         st.subheader('Historical and Predicted Generation Mix')
         st.pyplot(fig2)
