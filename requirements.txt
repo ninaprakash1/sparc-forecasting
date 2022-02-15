@@ -27,4 +27,4 @@ tqdm==4.62.3
 urllib3==1.26.8
 websocket-client==1.2.3
 wwo_hist==0.0.7
-xgboost==1.6.0
+xgboost==1.5.2
