@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import generate_graph_historical_and_forecasted, compute_co2
+from deploy.utils import generate_graph_historical_and_forecasted, compute_co2
 
 ###
 # Main app components
@@ -14,6 +14,9 @@ st.set_page_config(
 )
 
 st.image(energy_img)
+
+# res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/echo/something")
+# st.title(res.text)
 
 st.title('SPARC')
 st.header('{ Save Power and Reduce Carbon }')
