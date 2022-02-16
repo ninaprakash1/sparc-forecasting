@@ -192,8 +192,8 @@ def test_model(model_path):
 
     try: 
         model = load(model_path)
-        pred_ff = model.predict(steps=1, exog = data[weather_vars])
+        pred = model.predict(steps=1, exog = data[weather_vars])
 
-        return pred_ff
+        return pred
     except Exception as e:
         return e
