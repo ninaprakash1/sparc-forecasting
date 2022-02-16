@@ -1,4 +1,3 @@
-from tkinter import E
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup as bs
@@ -7,6 +6,7 @@ from pytz import timezone
 import time
 from io import StringIO
 from tqdm import tqdm
+import logging
 
 from joblib import load
 from wwo_hist import retrieve_hist_data
@@ -196,4 +196,5 @@ def test_model(model_path):
 
         return pred
     except Exception as e:
+        logging.error("TESTING")
         return e

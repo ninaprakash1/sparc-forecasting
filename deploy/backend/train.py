@@ -2,16 +2,19 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 import xgboost as xgb
 import numpy as np
 from joblib import dump
+import logging
 
 from utils import get_last_n_days
 
-def train():
-	last_2_years = get_last_n_days(365 * 2)
+
+def train(num_days):
+	last_2_years = get_last_n_days(num_days)
 
 	# TODO @ Kun
 	train_fossil_fuel_model(last_2_years)
 	train_renewable_model(last_2_years)
 	train_other_model(last_2_years)
+
 
 def train_fossil_fuel_model(last_2_years):
     """
@@ -23,6 +26,8 @@ def train_fossil_fuel_model(last_2_years):
 
 	Save model parameters as .py file to ./skforecast1hr/fossil_fuel_forecaster1hr.py
 	"""
+    logging.info("Training Fossil model. ")
+
     ff_sc = ['Coal','Natural Gas']
     last_2_years['fossil_fuel'] = last_2_years[ff_sc].sum(axis=1)
     random_seed = 123
@@ -37,6 +42,7 @@ def train_fossil_fuel_model(last_2_years):
 
     dump(forecaster_f, './skforecast1hr/fossil_fuel_forecaster1hr.py')
 
+
 def train_renewable_model(last_2_years):
     """
 	@param		last_2_years		Dataframe with same columns as X_train_california_2020-2021.csv
@@ -47,7 +53,11 @@ def train_renewable_model(last_2_years):
 
 	Save model parameters to ./skforecast1hr/renewable_forecaster1hr.py
 	"""
+    logging.info("Training Renewable model. ")
+
     renewable_sc = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas','Small hydro', 'Large Hydro', 'Nuclear']
+    logging.info(f"last 2 years: {last_2_years}")
+    logging.info(f"sums: {last_2_years[renewable_sc].sum(axis=1)}")
     last_2_years['renewable'] = last_2_years[renewable_sc].sum(axis=1)
     random_seed = 123
     regressor_r = xgb.XGBRegressor(random_state = random_seed, n_estimators = 1000,
@@ -61,6 +71,7 @@ def train_renewable_model(last_2_years):
 
     dump(forecaster_r, './skforecast1hr/renewable_forecaster1hr.py')
 
+
 def train_other_model(last_2_years):
     """
 	@param		last_2_years		Dataframe with same columns as X_train_california_2020-2021.csv
@@ -70,6 +81,7 @@ def train_other_model(last_2_years):
 
 	Save model parameters to ./skforecast1hr/other_forecaster1hr.py
 	"""
+    logging.info("Training OTHER model. ")
     other_sc = ['Batteries', 'Imports', 'Other']
     last_2_years['other'] = last_2_years[other_sc].sum(axis=1)
     random_seed = 123

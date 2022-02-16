@@ -8,7 +8,7 @@ import numpy as np
 import logging
 
 from inference import predict
-from train import train_renewable_model, train_fossil_fuel_model, train_other_model
+from train import train
 from utils import test_model
 
 
@@ -41,14 +41,11 @@ def train_models(param_str: str):
         logging.info("retraining with n=730")
 
     try: 
-        train_renewable_model(730)
-        logging.info(f"Renewable test: {test_model('renewable_forecaster1hr.py')}")
+        train(730)
 
-        train_fossil_fuel_model(730)
-        logging.info(f"Fossil test: {test_model('fossil_fuel_forecaster1hr.py')}")
-
-        train_other_model(730)
-        logging.info(f"Other test: {test_model('other_forecaster1hr.py')}")
+        logging.info(f"Renewable test: {test_model('./skforecast1hr/renewable_forecaster1hr.py')}")
+        logging.info(f"Fossil test: {test_model('./skforecast1hr/fossil_fuel_forecaster1hr.py')}")
+        logging.info(f"Other test: {test_model('./skforecast1hr/other_forecaster1hr.py')}")
         
         return {"result": f"Retrain Successful!"}
     except Exception as e:

@@ -1,6 +1,10 @@
 uvicorn
+bs4
+wwo_hist
+joblib
 fastapi
 numpy
 pandas
 skforecast
 xgboost
+requests
