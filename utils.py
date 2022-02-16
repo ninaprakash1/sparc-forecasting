@@ -41,9 +41,9 @@ def compute_co2(results, activity, hour):
     # Get forecasted generation mix
     #   --> approximating fossil fuel as only natural gas
     #   --> approximating other as only imports
-    nat_gas_mwh = results['fossil_fuel'].tolist()[hours_until_given_hour] # need .tolist() if calling locally
-    imports_mwh = results['other'].tolist()[hours_until_given_hour]
-    renewables_mwh = results['renewable'].tolist()[hours_until_given_hour]
+    nat_gas_mwh = results['fossil_fuel'][hours_until_given_hour] # need .tolist() if calling locally
+    imports_mwh = results['other'][hours_until_given_hour]
+    renewables_mwh = results['renewable'][hours_until_given_hour]
     total_supply = nat_gas_mwh + imports_mwh + renewables_mwh
 
     # Estimate energy usage
@@ -113,12 +113,12 @@ def generate_graph_historical_and_forecasted():
     ax3.legend(genmix_vars,loc='right')
 
     # Add the forecasting results
-    results = predict() # local call
+    # results = predict() # local call
 
-    # res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/predict")
-    # print('\n\n\nresult of call: ', res.text, '\n\n\n')
-    # res = json.loads(res.text)['result']
-    # results = {grouped_source: list(res[grouped_source].values()) for grouped_source in res.keys()}
+    res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/predict")
+    print('\n\n\nresult of call: ', res.text, '\n\n\n')
+    res = json.loads(res.text)['result']
+    results = {grouped_source: list(res[grouped_source].values()) for grouped_source in res.keys()}
     
     hours_from_pred = []
     for i in range(24):
@@ -126,8 +126,8 @@ def generate_graph_historical_and_forecasted():
     results['time'] = hours_from_pred
 
     for source_type in ['fossil_fuel','renewable','other']:
-        lst = results[source_type].tolist() # need if calling locally
-        # lst = results[source_type]
+        # lst = results[source_type].tolist() # need if calling locally
+        lst = results[source_type]
         ax2.plot(results['time'], lst)
         ax3.plot(results['time'], lst)
 
