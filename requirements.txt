@@ -21,8 +21,10 @@ python-dateutil==2.8.2
 pytz==2021.3
 pyzmq==22.3.0
 requests==2.27.1
+skforecast==0.4.1
 tdqm==0.0.1
 tqdm==4.62.3
 urllib3==1.26.8
 websocket-client==1.2.3
 wwo_hist==0.0.7
+xgboost==1.5.2
