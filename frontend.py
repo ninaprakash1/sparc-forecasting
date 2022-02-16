@@ -1,3 +1,5 @@
+import json
+import requests
 import streamlit as st
 from utils import generate_graph_historical_and_forecasted, compute_co2
 
@@ -66,3 +68,9 @@ if (clicked_generate):
         st.pyplot(fig3)
 
 clicked_generate = False
+
+retrain = st.button('Retrain model')
+if (retrain):
+    res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/train")
+    train_result = json.loads(res.text)['result']
+    st.write(train_result)
