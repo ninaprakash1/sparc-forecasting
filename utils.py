@@ -11,7 +11,6 @@ from io import StringIO
 from tqdm import tqdm
 from wwo_hist import retrieve_hist_data
 
-from deploy.backend.inference import predict
 
 def compute_co2(results, activity, hour):
     """
