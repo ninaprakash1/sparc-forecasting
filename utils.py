@@ -5,19 +5,7 @@ from datetime import datetime, timedelta
 from pytz import timezone
 import json
 
-
-def generate_graph_forecasted():
-    results = predict()
-    fig3, ax3 = plt.subplots(figsize=(16,8))
-    for source_type in results:
-        lst = results[source_type].tolist()
-        ax3.plot(range(len(lst)), lst)
-    ax3.set_title('Forecasted Generation Mix for Next 24 hours')
-    ax3.set_xlabel('Hours from Now')
-    ax3.set_ylabel('MWh')
-    ax3.legend(results.keys())
-
-    return results, fig3
+from deploy.backend.utils import get_last_n_days
 
 def generate_graph_historical_and_forecasted():
     genmix_vars = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas', 'Small hydro',

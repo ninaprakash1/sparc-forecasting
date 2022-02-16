@@ -1,7 +1,8 @@
 import json
 import requests
 import streamlit as st
-from utils import generate_graph_historical_and_forecasted, compute_co2
+from utils import generate_graph_historical_and_forecasted
+from deploy.backend.utils import compute_co2
 
 ###
 # Main app components
