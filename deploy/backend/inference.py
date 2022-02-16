@@ -3,7 +3,6 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 import pandas as pd
 from joblib import load
 
-
 def predict():
 	logging.info("Logging prediction hit")
 
