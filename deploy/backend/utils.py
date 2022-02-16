@@ -124,14 +124,13 @@ def get_genmix_data(day_strings, n):
     cached_data = None
     try:
         cached_data = pd.read_csv(GENMIX_CSV)
+        today = day_strings[-1]
+        day_strings = [x for x in day_strings if int(x) not in cached_data['Day'].values]
+
+        """ TODO: Some logic here to not hit API if prediction gauranteed recent """
+        day_strings += [today]
     except Exception as e: 
         cached_data = pd.DataFrame()
-        
-    today = day_strings[-1]
-    day_strings = [x for x in day_strings if int(x) not in cached_data['Day'].values]
-
-    """ TODO: Some logic here to not hit API if prediction gauranteed recent """
-    day_strings += [today]
 
     logging.info(f"To Scrape: {day_strings}")
 
