@@ -5,7 +5,7 @@ from joblib import load
 from utils import get_last_n_days
 
 
-def predict(num_days):
+def predict(num_days=5):
 	logging.info("Logging prediction hit")
 
 	# Load model
