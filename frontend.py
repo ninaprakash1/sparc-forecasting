@@ -72,13 +72,9 @@ clicked_generate = False
 
 retrain = st.button('Retrain model')
 if (retrain):
-    res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/train")
-    train_result = json.loads(res.text)['result']
-    st.write(train_result)
+    with st.empty():
+        st.write(f"Retraining...")
 
-
-
-
-""" TODO """
-# 1. Windows environment variable setting/getting for local url management
-# 2. Docker setup 
+        res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/train/days=5")
+        train_result = json.loads(res.text)['result']
+        st.success(train_result)
