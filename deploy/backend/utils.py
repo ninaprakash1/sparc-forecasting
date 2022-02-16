@@ -12,6 +12,10 @@ from joblib import load
 from wwo_hist import retrieve_hist_data
 
 
+GENMIX_CSV = "genmix.csv"
+WEATHER_CSV = "weather.csv"
+
+
 def compute_co2(results, activity, hour):
     """
     @param      results     Dictionary in form {'fossil_fuel': [], 'renewable', [], 'other': []}
@@ -104,6 +108,7 @@ def get_suppy_data(day):
 
 
 def get_weather_data(start_date, end_date, api_key):
+    """ TODO: Some logic here to not hit API if prediction gauranteed recent """
     hist_weather_data = retrieve_hist_data(api_key,
                                 ['california'],
                                 start_date,
@@ -116,16 +121,29 @@ def get_weather_data(start_date, end_date, api_key):
 
 
 def get_genmix_data(day_strings, n):
-    all_df = pd.DataFrame()
+    cached_data = pd.read_csv(GENMIX_CSV)
+    today = day_strings[-1]
+    day_strings = [x for x in day_strings if int(x) not in cached_data['Day'].values]
+
+    """ TODO: Some logic here to not hit API if prediction gauranteed recent """
+    day_strings += [today]
+
+    logging.info(f"To Scrape: {day_strings}")
+
     for day in tqdm(day_strings):
         data = get_suppy_data(day)
         new_df = pd.read_csv(data, sep=",")
         new_df['Day'] = [day for r in range(len(new_df['Time']))]
-        all_df = pd.concat([all_df, new_df])
+
+        # Remove all today's data and replace it
+        cached_data = cached_data[cached_data.Day != int(day)]
+
+        cached_data = pd.concat([cached_data, new_df])
         time.sleep(0.1)
-        
+    
+    cached_data.to_csv(GENMIX_CSV)
     # 3. Filter only last n * 24 hours
-    genmix_data = all_df.tail(int(n * 24 * 60 / 5))
+    genmix_data = cached_data.tail(int(n * 24 * 60 / 5))
     return genmix_data
 
 
