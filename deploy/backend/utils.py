@@ -121,7 +121,12 @@ def get_weather_data(start_date, end_date, api_key):
 
 
 def get_genmix_data(day_strings, n):
-    cached_data = pd.read_csv(GENMIX_CSV)
+    cached_data = None
+    try:
+        cached_data = pd.read_csv(GENMIX_CSV)
+    except Exception as e: 
+        cached_data = pd.DataFrame()
+        
     today = day_strings[-1]
     day_strings = [x for x in day_strings if int(x) not in cached_data['Day'].values]
 
