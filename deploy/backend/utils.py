@@ -1,3 +1,4 @@
+from tkinter import E
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup as bs
@@ -6,7 +7,10 @@ from pytz import timezone
 import time
 from io import StringIO
 from tqdm import tqdm
+
+from joblib import load
 from wwo_hist import retrieve_hist_data
+
 
 def compute_co2(results, activity, hour):
     """
@@ -57,6 +61,7 @@ def compute_co2(results, activity, hour):
 
     return co2 # lb
 
+
 def get_day_strings(n):
     """
     @param      n               Number of historical days starting from today
@@ -83,6 +88,7 @@ def get_day_strings(n):
         
     return day_strings[::-1], start_date, end_date
 
+
 def get_suppy_data(day):
     """
     @param      day     String formatted in %Y%m%d to make request to CAISO
@@ -96,6 +102,7 @@ def get_suppy_data(day):
     
     return csv
 
+
 def get_weather_data(start_date, end_date, api_key):
     hist_weather_data = retrieve_hist_data(api_key,
                                 ['california'],
@@ -106,6 +113,7 @@ def get_weather_data(start_date, end_date, api_key):
                                 export_csv = False,
                                 store_df = True)[0]
     return hist_weather_data
+
 
 def get_genmix_data(day_strings, n):
     all_df = pd.DataFrame()
@@ -119,6 +127,7 @@ def get_genmix_data(day_strings, n):
     # 3. Filter only last n * 24 hours
     genmix_data = all_df.tail(int(n * 24 * 60 / 5))
     return genmix_data
+
 
 def merge_data(genmix_data, weather_data):
     """
@@ -148,6 +157,7 @@ def merge_data(genmix_data, weather_data):
 
     return full_data
 
+
 def get_last_n_days(n):
     """
     Main function to gather and merge all inference data for n historical days
@@ -171,3 +181,19 @@ def get_last_n_days(n):
     last_n_days = merge_data(genmix_data, weather_data)
     
     return last_n_days
+
+
+def test_model(model_path):
+    """ Tests model after retrain """
+    
+    # Load train data
+    weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
+    data = pd.read_csv("./X_train_california_2020-2021.csv")
+
+    try: 
+        model = load(model_path)
+        pred_ff = model.predict(steps=1, exog = data[weather_vars])
+
+        return pred_ff
+    except Exception as e:
+        return e
