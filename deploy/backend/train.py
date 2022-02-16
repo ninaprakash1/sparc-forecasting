@@ -7,7 +7,7 @@ import logging
 from utils import get_last_n_days
 
 
-def train(num_days):
+def train(num_days=24):
 	last_2_years = get_last_n_days(num_days)
 
 	# TODO @ Kun
@@ -29,6 +29,7 @@ def train_fossil_fuel_model(last_2_years):
     logging.info("Training Fossil model. ")
 
     ff_sc = ['Coal','Natural Gas']
+    weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
     last_2_years['fossil_fuel'] = last_2_years[ff_sc].sum(axis=1)
     random_seed = 123
     regressor_f = xgb.XGBRegressor(random_state = random_seed, n_estimators = 1000,
@@ -38,7 +39,7 @@ def train_fossil_fuel_model(last_2_years):
                     regressor = regressor_f,
                     lags      = np.arange(1, 25)
                 )
-    forecaster_f.fit(y = train['fossil_fuel'])
+    forecaster_f.fit(y = last_2_years['fossil_fuel'], exog = last_2_years[weather_vars])
 
     dump(forecaster_f, './skforecast1hr/fossil_fuel_forecaster1hr.py')
 
@@ -54,10 +55,8 @@ def train_renewable_model(last_2_years):
 	Save model parameters to ./skforecast1hr/renewable_forecaster1hr.py
 	"""
     logging.info("Training Renewable model. ")
-
+    weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
     renewable_sc = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas','Small hydro', 'Large Hydro', 'Nuclear']
-    logging.info(f"last 2 years: {last_2_years}")
-    logging.info(f"sums: {last_2_years[renewable_sc].sum(axis=1)}")
     last_2_years['renewable'] = last_2_years[renewable_sc].sum(axis=1)
     random_seed = 123
     regressor_r = xgb.XGBRegressor(random_state = random_seed, n_estimators = 1000,
@@ -67,7 +66,7 @@ def train_renewable_model(last_2_years):
                 regressor = regressor_r,
                 lags      = np.arange(1, 25)
              )
-    forecaster_r.fit(y = train['renewable'])
+    forecaster_r.fit(y = last_2_years['renewable'], exog = last_2_years[weather_vars])
 
     dump(forecaster_r, './skforecast1hr/renewable_forecaster1hr.py')
 
@@ -82,7 +81,9 @@ def train_other_model(last_2_years):
 	Save model parameters to ./skforecast1hr/other_forecaster1hr.py
 	"""
     logging.info("Training OTHER model. ")
+
     other_sc = ['Batteries', 'Imports', 'Other']
+    weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
     last_2_years['other'] = last_2_years[other_sc].sum(axis=1)
     random_seed = 123
     regressor_o = xgb.XGBRegressor(random_state = random_seed, n_estimators = 1000,
@@ -92,6 +93,6 @@ def train_other_model(last_2_years):
                 regressor = regressor_o,
                 lags      = np.arange(1, 25)
              )
-    forecaster_o.fit(y = train['other'])
+    forecaster_o.fit(y = last_2_years['other'], exog = last_2_years[weather_vars])
 
     dump(forecaster_o, './skforecast1hr/other_forecaster1hr.py')

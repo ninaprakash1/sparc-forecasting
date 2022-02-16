@@ -186,6 +186,7 @@ def get_last_n_days(n):
 def test_model(model_path):
     """ Tests model after retrain """
     
+    logging.info(f"Loading model: {model_path}")
     # Load train data
     weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
     data = pd.read_csv("./X_train_california_2020-2021.csv")

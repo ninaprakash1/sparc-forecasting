@@ -37,11 +37,16 @@ def read_root():
 def train_models(param_str: str):
     """ Experimental endpoint to retrain models, accepts param str """
     logging.info(f"Recieved request for retrain with param_str: {param_str}")
-    if "years=2" in param_str:
-        logging.info("retraining with n=730")
+    num_days = 24
+    logging.info(f",,{param_str.count('days=')}")
+    if param_str.count("days=") == 1:
+        num_days = int(param_str.split("days=")[1].strip())
+        logging.info("retraining with n={num_days}")
+    else:
+        return {"result": "Enter correct days param"}
 
     try: 
-        train(730)
+        train(num_days)
 
         logging.info(f"Renewable test: {test_model('./skforecast1hr/renewable_forecaster1hr.py')}")
         logging.info(f"Fossil test: {test_model('./skforecast1hr/fossil_fuel_forecaster1hr.py')}")
@@ -49,6 +54,7 @@ def train_models(param_str: str):
         
         return {"result": f"Retrain Successful!"}
     except Exception as e:
+        logging.warning(e)
         return {"result": f"{e}"}
 
 if __name__ == "__main__":
