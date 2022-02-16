@@ -1,6 +1,7 @@
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 import xgboost as xgb
 import numpy as np
+from joblib import dump
 
 from utils import get_last_n_days
 
@@ -13,7 +14,6 @@ def train():
 	train_other_model(last_2_years)
 
 def train_fossil_fuel_model(last_2_years):
-	# TODO @ Kun
     """
 	@param		last_2_years		Dataframe with same columns as X_train_california_2020-2021.csv
 	
@@ -35,11 +35,10 @@ def train_fossil_fuel_model(last_2_years):
                 )
     forecaster_f.fit(y = train['fossil_fuel'])
 
-    # @ TODO add a line to dump the saved model
+    dump(forecaster_f, './skforecast1hr/fossil_fuel_forecaster1hr.py')
 
 def train_renewable_model(last_2_years):
-	# TODO @ Kun
-	"""
+    """
 	@param		last_2_years		Dataframe with same columns as X_train_california_2020-2021.csv
 	
 	Train model on ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas','Small hydro', 'Large Hydro', 'Nuclear']
@@ -48,11 +47,22 @@ def train_renewable_model(last_2_years):
 
 	Save model parameters to ./skforecast1hr/renewable_forecaster1hr.py
 	"""
-	pass
+    renewable_sc = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas','Small hydro', 'Large Hydro', 'Nuclear']
+    last_2_years['renewable'] = last_2_years[renewable_sc].sum(axis=1)
+    random_seed = 123
+    regressor_r = xgb.XGBRegressor(random_state = random_seed, n_estimators = 1000,
+                             gamma = 5, learning_rate = 0.01, max_depth = 5,
+                             reg_lambda = 1, objective = 'reg:squarederror')
+    forecaster_r = ForecasterAutoreg(
+                regressor = regressor_r,
+                lags      = np.arange(1, 25)
+             )
+    forecaster_r.fit(y = train['renewable'])
+
+    dump(forecaster_r, './skforecast1hr/renewable_forecaster1hr.py')
 
 def train_other_model(last_2_years):
-	# TODO @ Kun
-	"""
+    """
 	@param		last_2_years		Dataframe with same columns as X_train_california_2020-2021.csv
 	
 	Train model on ['Batteries', 'Imports', 'Other'] columns of last_2_years, with weather_vars
@@ -60,4 +70,16 @@ def train_other_model(last_2_years):
 
 	Save model parameters to ./skforecast1hr/other_forecaster1hr.py
 	"""
-	pass
+    other_sc = ['Batteries', 'Imports', 'Other']
+    last_2_years['other'] = last_2_years[other_sc].sum(axis=1)
+    random_seed = 123
+    regressor_o = xgb.XGBRegressor(random_state = random_seed, n_estimators = 1000,
+                             gamma = 5, learning_rate = 0.01, max_depth = 5,
+                             reg_lambda = 1, objective = 'reg:squarederror')
+    forecaster_o = ForecasterAutoreg(
+                regressor = regressor_o,
+                lags      = np.arange(1, 25)
+             )
+    forecaster_o.fit(y = train['other'])
+
+    dump(forecaster_o, './skforecast1hr/other_forecaster1hr.py')
