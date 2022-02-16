@@ -140,7 +140,10 @@ def get_genmix_data(day_strings, n):
         new_df['Day'] = [day for r in range(len(new_df['Time']))]
 
         # Remove all today's data and replace it
-        cached_data = cached_data[cached_data.Day != int(day)]
+        try:
+            cached_data = cached_data[cached_data.Day != int(day)]
+        except Exception as e:
+            logging.warning(e)
 
         cached_data = pd.concat([cached_data, new_df])
         time.sleep(0.1)
