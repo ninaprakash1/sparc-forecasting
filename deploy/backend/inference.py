@@ -2,9 +2,10 @@ import logging
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 import pandas as pd
 from joblib import load
+from utils import get_last_n_days
 
 
-def predict():
+def predict(num_days):
 	logging.info("Logging prediction hit")
 
 	# Load model
@@ -15,7 +16,8 @@ def predict():
 	# Load train data
 	train_x_fn = "./X_train_california_2020-2021.csv"
 	weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
-	data = pd.read_csv(train_x_fn)
+
+	data = get_last_n_days(num_days)
 
 	pred_ff = forecaster_ff.predict(steps=24, exog = data[weather_vars])
 	pred_renewable = forecaster_renewable.predict(steps=24, exog = data[weather_vars])
