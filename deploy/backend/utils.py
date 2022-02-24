@@ -179,8 +179,10 @@ def merge_data(genmix_data, weather_data):
 
     # Join data by datetime
     full_data = genmix.merge(weather.set_index('date_time_hourly'),on='date_time_hourly',how='inner')
+    full_data_sorted = full_data.sort_values(by='date_time_hourly')
 
-    return full_data
+    # return full_data
+    return full_data_sorted
 
 
 def get_last_n_days(n):
