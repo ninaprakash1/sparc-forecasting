@@ -17,7 +17,7 @@ other = ['Imports', 'Other']
 hydro = ['Small hydro', 'Large Hydro']
 renewable_other = ['Geothermal', 'Biomass', 'Biogas', 'Nuclear']
 
-feat_cols = ['Hydro', 'Fossil_Fuel', 'Other', 'Renewable', 'Solar', 'Renewable_other']
+feat_cols = ['Hydro', 'Fossil_fuel', 'Other', 'Renewable', 'Solar', 'Renewable_other', 'Total', 'Batteries']
 
 def smooth_5min_data(data, kernel_size = 12):
     kernel = np.ones(kernel_size) / kernel_size
@@ -28,10 +28,11 @@ def train(num_days=60):
 
     # aggregate energy sources
     df_train['Hydro'] = df_train[hydro].sum(axis =1)
-    df_train['Fossil_Fuel'] = df_train[fossil_fuel].sum(axis =1)
+    df_train['Fossil_fuel'] = df_train[fossil_fuel].sum(axis =1)
     df_train['Other'] = df_train[other].sum(axis=1)
     df_train['Renewable'] = df_train[renewable].sum(axis =1)
     df_train['Renewable_other'] = df_train[renewable_other].sum(axis =1)
+    df_train['Total'] = df_train[energy].sum(axis =1)
 
     dfs_train = df_train.copy()
     # smooth and resample 5min data to 1hr
