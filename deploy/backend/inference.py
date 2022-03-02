@@ -5,7 +5,9 @@ from joblib import load
 from utils import get_last_n_days
 
 
+
 def predict(num_days=30):
+
 	logging.info("Logging prediction hit")
 
 	# Load models - check train.py for aggregated columns
@@ -18,7 +20,6 @@ def predict(num_days=30):
 	forecaster_solar = load("./skforecast1hr/Solar_forecaster1hr.py")
 	forecaster_total = load("./skforecast1hr/Total_forecaster1hr.py")
 
-	# Load train data
 	weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
 
 	# data = get_last_n_days(num_days)
