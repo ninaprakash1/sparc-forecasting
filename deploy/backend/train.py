@@ -26,22 +26,24 @@ def smooth_5min_data(data, kernel_size = 12):
 def train(num_days=60):
     df_train = get_last_n_days(num_days)
 
-    # aggregate energy sources
-    df_train['Hydro'] = df_train[hydro].sum(axis =1)
-    df_train['Fossil_fuel'] = df_train[fossil_fuel].sum(axis =1)
-    df_train['Other'] = df_train[other].sum(axis=1)
-    df_train['Renewable'] = df_train[renewable].sum(axis =1)
-    df_train['Renewable_other'] = df_train[renewable_other].sum(axis =1)
-    df_train['Total'] = df_train[energy].sum(axis =1)
-
     dfs_train = df_train.copy()
     # smooth and resample 5min data to 1hr
     if len(df_train) > int(num_days)*48:
         kernel_size = 12
-        for ycol in dfs_train.columns:
-            dfs_train[ycol] = smooth_5min_data(dfs_train[ycol], kernel_size=kernel_size)
+        for ycol in df_train.columns:
+            dfs_train[ycol] = smooth_5min_data(df_train[ycol], kernel_size=kernel_size)
 
-            dffs_train = dfs_train.iloc[::kernel_size, :]
+        dffs_train = dfs_train.iloc[::kernel_size, :]
+    else:
+        dffs_train = df_train.copy()
+
+    # aggregate energy sources
+    dffs_train['Hydro'] = dffs_train[hydro].sum(axis =1)
+    dffs_train['Fossil_fuel'] = dffs_train[fossil_fuel].sum(axis =1)
+    dffs_train['Other'] = dffs_train[other].sum(axis=1)
+    dffs_train['Renewable'] = dffs_train[renewable].sum(axis =1)
+    dffs_train['Renewable_other'] = dffs_train[renewable_other].sum(axis =1)
+    dffs_train['Total'] = dffs_train[energy].sum(axis =1)
 
     for feat_col in feat_cols:
         regressor = xgb.XGBRegressor(random_state=42, n_estimators=1000,
