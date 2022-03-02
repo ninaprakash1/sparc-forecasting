@@ -28,10 +28,14 @@ st.sidebar.markdown("")
 st.sidebar.markdown("*Kun Guo, Nina Prakash, Griffin Schillinger Tarpenning | Stanford University | CS 329s*")
 
 # User Input
-hour = st.selectbox("Select a time in the next 24 hours",
+
+activity = st.selectbox("I want to", ["Charge an EV", "Run a load of laundry","Take a hot shower", "Run central AC for 1 hour"])
+
+hour = st.selectbox("in the next 24 hours at",
                     ['12:00am'] + [str(h) + ':00am' for h in range(1,12)] + ['12:00pm'] + [str(h) + ':00pm' for h in range(1,12)],
                     index=13)
-activity = st.selectbox("Select an activity", ["Charge an EV", "Run a load of laundry","Take a hot shower"])
+
+duration = st.selectbox("for", ["1 hour"] + [str(i) + "hours" for i in range(2,25)])
 
 clicked_generate = st.button('Generate Forecast')
 
@@ -41,7 +45,7 @@ if (clicked_generate):
     with st.empty():
         st.write(f"Gathering prediction...")
         results, fig2, fig3 = generate_graph_historical_and_forecasted()
-        co2 = compute_co2(results, activity, hour)
+        co2 = compute_co2(results, activity, hour, duration)
         st.success('Model run complete')
 
     # Write output

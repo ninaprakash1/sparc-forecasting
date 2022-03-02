@@ -12,7 +12,17 @@ from joblib import load
 from wwo_hist import retrieve_hist_data
 
 
-def compute_co2(results, activity, hour):
+ACTIVITY_USAGE_KWH = {
+    "Charge an EV": 50, # based on 50 kwh battery on standard range plus model 3 tesla
+    "Run a load of laundry": 5,
+    "Take a hot shower": 8.2, # https://greengeekblog.com/tools/shower-cost-calculator/#:~:text=An%20average%208.2%20minute%20shower,energy%20to%20heat%20our%20water.,
+    "Run central AC for 1 hour": 3.5, # https://energyusecalculator.com/electricity_centralac.htm
+    "Run a space heater for 1 hour": 1.5, # https://experthomereport.com/do-space-heaters-use-a-lot-of-electricity/#:~:text=Although%20amounts%20vary%20per%20space,but%20in%20hours%20of%20kilowatt.
+    "Run hot water heater for 1 hour": 4 # https://www.directenergy.com/learning-center/how-much-energy-water-heater-use#:~:text=Typically%2C%20a%20hot%20water%20heater,month%2C%20or%20%24438%20per%20year.
+}
+
+
+def compute_co2(results, activity, hour, duration):
     """
     @param      results     Dictionary in form {'fossil_fuel': [], 'renewable', [], 'other': []}
                             where each list has length 24 and represents the predicted supply at
@@ -25,8 +35,11 @@ def compute_co2(results, activity, hour):
                                 https://www.caiso.com/Documents/GreenhouseGasEmissionsTracking-Methodology.pdf
     """
 
-    if activity not in {"Charge an EV", "Run a load of laundry","Take a hot shower"}:
-        raise ValueError('activity must be one of {"Charge an EV", "Run a load of laundry","Take a hot shower"}. Received {}'.format(activity))
+    if activity not in {"Charge an EV", "Run a load of laundry",
+                        "Take a hot shower", "Run central AC for 1 hour",
+                        "Run a space heater for 1 hour",
+                        "Run hot water heater for 1 hour"}:
+        raise ValueError('activity must be one of {"Charge an EV", "Run a load of laundry","Take a hot shower", "Run central AC for 1 hour","Run a space heater for 1 hour", "Run hot water heater for  1 hour"}. Received {}'.format(activity))
 
     # Get forecasted supply results at requested hour
     current_hour = datetime.now(timezone('US/Pacific')).hour # [0, 23]
@@ -37,6 +50,7 @@ def compute_co2(results, activity, hour):
     else:
         given_hour = int(hour.split(':')[0]) + 12 if hour[-2:] == 'pm' else int(hour.split(':')[0])
     hours_until_given_hour = int((datetime.strptime(str(current_hour),'%H') - datetime.strptime(str(given_hour), '%H')).seconds / 3600)
+    dur = int(duration.split(' ')[0])
 
     # Get forecasted generation mix
     #   --> approximating fossil fuel as only natural gas
@@ -50,13 +64,7 @@ def compute_co2(results, activity, hour):
     nat_gas_emissions_factor = 898 * 1e-3 # (lb CO2 / MWh) x (1 MWh / 10^3 kWh) = lb CO2 / kWh
     imports_emissions_factor = 0.428 * 4.536e4 * 1e-3 # (mTCO2/MWh) x (lb / mT) * (1 MWh / 10^3 kWh) = lb CO2 / kWh
 
-    activity_usage_kwh = {
-        "Charge an EV": 50, # based on 50 kwh battery on standard range plus model 3 tesla
-        "Run a load of laundry": 5,
-        "Take a hot shower": 8.2 # https://greengeekblog.com/tools/shower-cost-calculator/#:~:text=An%20average%208.2%20minute%20shower,energy%20to%20heat%20our%20water.
-    }
-
-    co2 = activity_usage_kwh[activity] * (nat_gas_mwh / total_supply * nat_gas_emissions_factor + \
+    co2 = ACTIVITY_USAGE_KWH[activity] * dur * (nat_gas_mwh / total_supply * nat_gas_emissions_factor + \
         imports_mwh / total_supply * imports_emissions_factor)
 
     return co2 # lb
