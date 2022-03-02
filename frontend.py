@@ -3,6 +3,8 @@ import requests
 import streamlit as st
 from utils import generate_graph_historical_and_forecasted
 from deploy.backend.utils import compute_co2
+from datetime import datetime, timedelta
+import plotly.graph_objects as go
 
 ###
 # Main app components
@@ -65,6 +67,22 @@ hour = st.selectbox("Select a time in the next 24 hours",
 
 duration = st.selectbox("Select a duration", ["1 hour"] + [str(i) + " hours" for i in range(2,25)])
 
+# now = datetime.now()
+# end = now + timedelta(hours=24)
+# step = timedelta(hours=1)
+
+# start_time = st.slider(
+#     "Select a time range",
+#      min_value=now,
+#      max_value=end,
+#      value=(now+timedelta(hours=2), now + timedelta(hours=7)),
+#      step=step,
+#      format="MM/DD/YY \n hh:00"
+# )
+
+# testing = st.slider('Select a range', 0,10,(1,2))
+
+
 choice = st.radio("Pick one",["Use default energy consumption of {}: {} kWh".format(activity_present_tense[activity],
                                                                              ACTIVITY_USAGE_KWH[activity]), "Enter my own"])
 
@@ -93,16 +111,60 @@ if (clicked_generate):
 
     st.header('%.1f lb CO2' %(co2),anchor='prediction')
 
-    pred_alignment = """
-    <style>
-    #prediction {
-    text-align: center
-    }
-    #prediction {
-    color: green
-    }
-    </style>
-    """
+    fig = go.Figure()
+    fig.add_trace(go.Indicator(
+        domain = {'x':[0,1], 'y':[0,1]},
+        value = co2,
+        mode = 'gauge',
+        gauge = {
+            'shape' : 'angular',
+            'steps':[{'range':[0,33*5], 'color':'#37a706'},
+                    {'range':[33*5,67*5], 'color':'#e1ed41'},
+                    {'range':[67*5,100*5], 'color':'#D82E3F'}],
+            'bar':{'color':'black', 'thickness':0.0},
+            'threshold':{'line':{'width':8, 'color':'black'}
+                        ,'thickness':0.8, 'value':co2},
+            'axis':{'range':[None,500]}
+        }
+    
+    ))
+
+    st.plotly_chart(fig)
+
+    if (co2 < 33 * 5):
+        pred_alignment = """
+        <style>
+        #prediction {
+        text-align: center
+        }
+        #prediction {
+        color: #37a706
+        }
+        </style>
+        """
+    elif (co2 < 67*5):
+        pred_alignment = """
+        <style>
+        #prediction {
+        text-align: center
+        }
+        #prediction {
+        color: #e1ed41
+        }
+        </style>
+        """
+    else:
+        pred_alignment = """
+        <style>
+        #prediction {
+        text-align: center
+        }
+        #prediction {
+        color: #D82E3F
+        }
+        </style>
+        """
+
     st.markdown(pred_alignment, unsafe_allow_html=True)
 
     with st.expander("Click to see the forecast results"):
