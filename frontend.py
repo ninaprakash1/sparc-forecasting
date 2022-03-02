@@ -2,7 +2,7 @@ import json
 import requests
 import streamlit as st
 from utils import generate_graph_historical_and_forecasted
-from deploy.backend.utils import compute_co2
+from deploy.backend.utils import compute_co2, ACTIVITY_USAGE_KWH
 
 ###
 # Main app components
@@ -29,13 +29,42 @@ st.sidebar.markdown("*Kun Guo, Nina Prakash, Griffin Schillinger Tarpenning | St
 
 # User Input
 
-activity = st.selectbox("I want to", ["Charge an EV", "Run a load of laundry","Take a hot shower", "Run central AC for 1 hour"])
+activity = st.selectbox("Select an activity", ["Charge an EV (Level 1)", "Charge an EV (Level 2)",
+                                               "Charge an EV (Level 3)", "Run the washing machine",
+                                               "Run the dryer", "Take a hot shower",
+                                               "Run central AC", "Run a space heater",
+                                               "Run hot water heater", "Run the dishwasher",
+                                               "Watch TV"])
 
-hour = st.selectbox("in the next 24 hours at",
+activity_present_tense = {
+    "Charge an EV (Level 1)": "charging an EV (Level 1)",
+    "Charge an EV (Level 2)": "charging an EV (Level 2)",
+    "Charge an EV (Level 3)": "charging an EV (Level 3)",
+    "Run the washing machine": "running the washing machine",
+    "Run the dryer": "running the dryer",
+    "Take a hot shower": "taking a hot shower",
+    "Run central AC": "running central AC",
+    "Run a space heater": "running a space heater",
+    "Run hot water heater": "running hot water heater",
+    "Run the dishwasher": "running the dishwasher",
+    "Watch TV": "watching TV"
+}
+
+hour = st.selectbox("Select a time in the next 24 hours",
                     ['12:00am'] + [str(h) + ':00am' for h in range(1,12)] + ['12:00pm'] + [str(h) + ':00pm' for h in range(1,12)],
                     index=13)
 
-duration = st.selectbox("for", ["1 hour"] + [str(i) + "hours" for i in range(2,25)])
+duration = st.selectbox("Select a duration", ["1 hour"] + [str(i) + " hours" for i in range(2,25)])
+
+choice = st.radio("Pick one",["Use default energy consumption of {}: {} kWh".format(activity_present_tense[activity],
+                                                                             ACTIVITY_USAGE_KWH[activity]), "Enter my own"])
+
+if (choice == "Enter my own"):
+    energy_cons = st.text_input("Energy consumption of {} (kW):".format(activity_present_tense[activity]), ACTIVITY_USAGE_KWH[activity], max_chars=3)
+    try:
+        energy_cons = int(energy_cons)
+    except:
+        st.error("Please enter a number")
 
 clicked_generate = st.button('Generate Forecast')
 
@@ -49,7 +78,7 @@ if (clicked_generate):
         st.success('Model run complete')
 
     # Write output
-    st.subheader('To {} at {}, you will produce: '.format(activity[0].lower() + activity[1:], hour))
+    st.subheader('To {} at {} for {}, you will produce: '.format(activity[0].lower() + activity[1:], hour, duration))
 
     st.header('%.1f lb CO2' %(co2),anchor='prediction')
 

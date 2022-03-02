@@ -11,14 +11,20 @@ import logging
 from joblib import load
 from wwo_hist import retrieve_hist_data
 
+GENMIX_CSV = "genmix.csv"
 
-ACTIVITY_USAGE_KWH = {
-    "Charge an EV": 50, # based on 50 kwh battery on standard range plus model 3 tesla
-    "Run a load of laundry": 5,
+ACTIVITY_USAGE_KWH = { # these are all kW x 1 hour
+    "Charge an EV (Level 1)": 1, # https://rmi.org/electric-vehicle-charging-for-dummies/#:~:text=If%20you%20just%20plug%20an,7%20kW%20and%2019%20kW.
+    "Charge an EV (Level 2)": 13,
+    "Charge an EV (Level 3)": 50,
+    "Run the washing machine": 5, # https://blog.arcadia.com/electricity-costs-10-key-household-products/#:~:text=An%20average%20cycle%20for%20a,to%20run%20for%2030%20minutes.
+    "Run the dryer": 4, # https://majorenergy.com/how-much-electricity-does-a-dryer-use/#:~:text=Dryers%20are%20typically%20somewhere%20in,and%206%20kilowatts%20an%20hour.
     "Take a hot shower": 8.2, # https://greengeekblog.com/tools/shower-cost-calculator/#:~:text=An%20average%208.2%20minute%20shower,energy%20to%20heat%20our%20water.,
-    "Run central AC for 1 hour": 3.5, # https://energyusecalculator.com/electricity_centralac.htm
-    "Run a space heater for 1 hour": 1.5, # https://experthomereport.com/do-space-heaters-use-a-lot-of-electricity/#:~:text=Although%20amounts%20vary%20per%20space,but%20in%20hours%20of%20kilowatt.
-    "Run hot water heater for 1 hour": 4 # https://www.directenergy.com/learning-center/how-much-energy-water-heater-use#:~:text=Typically%2C%20a%20hot%20water%20heater,month%2C%20or%20%24438%20per%20year.
+    "Run central AC": 3.5, # https://energyusecalculator.com/electricity_centralac.htm
+    "Run a space heater": 1.5, # https://experthomereport.com/do-space-heaters-use-a-lot-of-electricity/#:~:text=Although%20amounts%20vary%20per%20space,but%20in%20hours%20of%20kilowatt.
+    "Run hot water heater": 4, # https://www.directenergy.com/learning-center/how-much-energy-water-heater-use#:~:text=Typically%2C%20a%20hot%20water%20heater,month%2C%20or%20%24438%20per%20year.
+    "Run the dishwasher": 1.8, # https://www.inspirecleanenergy.com/blog/sustainable-living/cost-to-run-dishwasher#:~:text=Most%20dishwashers%20use%20an%20average,hours%20(kWh)%20of%20electricity.
+    "Watch TV": 0.1 # https://letsavelectricity.com/how-much-power-does-a-tv-use-in-an-hour/
 }
 
 
@@ -35,11 +41,10 @@ def compute_co2(results, activity, hour, duration):
                                 https://www.caiso.com/Documents/GreenhouseGasEmissionsTracking-Methodology.pdf
     """
 
-    if activity not in {"Charge an EV", "Run a load of laundry",
-                        "Take a hot shower", "Run central AC for 1 hour",
-                        "Run a space heater for 1 hour",
-                        "Run hot water heater for 1 hour"}:
-        raise ValueError('activity must be one of {"Charge an EV", "Run a load of laundry","Take a hot shower", "Run central AC for 1 hour","Run a space heater for 1 hour", "Run hot water heater for  1 hour"}. Received {}'.format(activity))
+    activities = set(ACTIVITY_USAGE_KWH.keys())
+
+    if activity not in activities:
+        raise ValueError('activity must be one of {}. Received {}'.format(str(activities), activity))
 
     # Get forecasted supply results at requested hour
     current_hour = datetime.now(timezone('US/Pacific')).hour # [0, 23]
