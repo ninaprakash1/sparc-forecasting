@@ -30,7 +30,7 @@ def train(num_days=60):
     # smooth and resample 5min data to 1hr
     if len(df_train) > int(num_days)*48:
         kernel_size = 12
-        for ycol in df_train.columns:
+        for ycol in energy:
             dfs_train[ycol] = smooth_5min_data(df_train[ycol], kernel_size=kernel_size)
 
         dffs_train = dfs_train.iloc[::kernel_size, :]
