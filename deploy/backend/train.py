@@ -38,9 +38,10 @@ def train(num_days=60):
     # smooth and resample 5min data to 1hr
     if len(df_train) > int(num_days)*48:
         kernel_size = 12
-        for ycol in energy:
-            dfs_train[ycol] = smooth_5min_data(df_train[ycol], kernel_size=kernel_size)
-            dfs_train = dfs_train.iloc[::kernel_size, :]
+        for ycol in dfs_train.columns:
+            dfs_train[ycol] = smooth_5min_data(dfs_train[ycol], kernel_size=kernel_size)
+
+            dffs_train = dfs_train.iloc[::kernel_size, :]
 
     for feat_col in feat_cols:
         regressor = xgb.XGBRegressor(random_state=42, n_estimators=1000,
@@ -49,7 +50,7 @@ def train(num_days=60):
 
         forecaster = ForecasterAutoreg(regressor=regressor, lags=24)
 
-        forecaster.fit(y=dfs_train[feat_col])
+        forecaster.fit(y=dffs_train[feat_col])
 
         # Save model
         dump(forecaster, filename= './skforecast1hr/'+ feat_col +'_forecaster1hr.py')
