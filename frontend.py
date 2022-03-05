@@ -171,8 +171,8 @@ if (clicked_generate):
         st.subheader('Historical and Predicted Generation Mix')
         st.pyplot(fig2)
 
-        st.subheader('Historical (Detailed) and Predicted Generation Mix')
-        st.pyplot(fig3)
+        # st.subheader('Historical (Detailed) and Predicted Generation Mix')
+        # st.pyplot(fig3)
 
 clicked_generate = False
 

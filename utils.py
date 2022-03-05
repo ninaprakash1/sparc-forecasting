@@ -12,11 +12,15 @@ def generate_graph_historical_and_forecasted():
         'Coal', 'Nuclear', 'Batteries', 'Imports', 'Natural Gas',
         'Large Hydro']
 
-    renewable = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas','Small hydro', 'Large Hydro', 'Nuclear']
-    fossil_fuel = ['Coal', 'Natural Gas']   
-    other = ['Batteries', 'Imports', 'Other']
+    fossil_fuel = ['Coal','Natural Gas']
+    other = ['Imports', 'Other']
+    hydro = ['Small hydro', 'Large Hydro']
+    renewable_other = ['Geothermal', 'Biomass', 'Biogas', 'Nuclear']
+    # solar = ['Solar']
+    # wind = ['Wind']
+    # batteries = ['Batteries']
 
-    colors_grouped = ['#1f77b4','#ff7f0e','#2ca02c']
+    colors_grouped = ['#2e91e5','#e15f99','#1ca71c', '#fb0d0d', '#da16ff', '#222a2a','#b68100']
     colors_detailed = ['green','gray','brown','purple','orange','red','yellow','black','blue','pink','teal','lawngreen','indigo']
 
     """
@@ -30,14 +34,15 @@ def generate_graph_historical_and_forecasted():
 
     # Add grouped columns
     data2['fossil_fuel'] = data2[fossil_fuel].sum(axis=1)
-    data2['renewable'] = data2[renewable].sum(axis=1)
     data2['other'] = data2[other].sum(axis=1)
+    data2['hydro'] = data2[hydro].sum(axis=1)
+    data2['renewable_other'] = data2[renewable_other].sum(axis=1)
 
     # Set up grouped plot (ax2)
     fig2, ax2 = plt.subplots(figsize=(16,8))
-    for source_indx, source in enumerate(['fossil_fuel','renewable','other']):
+    for source_indx, source in enumerate(['fossil_fuel','Solar','Wind','hydro','renewable_other','Batteries','other']):
         ax2.plot(data2['date_time_5min'], data2[source], c=colors_grouped[source_indx])
-    ax2.legend(['fossil_fuel','renewable','other'])
+    ax2.legend(['Fossil Fuels','Solar','Wind','Hydro','Other Renewables','Batteries','Other'])
 
     # Set up detailed plot (ax3)
     fig3, ax3 = plt.subplots(figsize=(16,8))
@@ -46,8 +51,6 @@ def generate_graph_historical_and_forecasted():
     ax3.legend(genmix_vars,loc='right')
 
     # Add the forecasting results
-    # results = predict() # local call
-
     res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/predict")
     print('\n\n\nresult of call: ', res.text, '\n\n\n')
     res = json.loads(res.text)['result']
@@ -58,8 +61,7 @@ def generate_graph_historical_and_forecasted():
         hours_from_pred.append(data2.iloc[-1]['date_time_5min'] + timedelta(hours=i))
     results['time'] = hours_from_pred
 
-    for source_type in ['fossil_fuel','renewable','other']:
-        # lst = results[source_type].tolist() # need if calling locally
+    for source_type in ['fossil_fuel','solar','wind','hydro','renewable_other','battery','other']:
         lst = results[source_type]
         ax2.plot(results['time'], lst)
         ax3.plot(results['time'], lst)
