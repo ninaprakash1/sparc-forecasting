@@ -27,11 +27,6 @@ def compute_co2(results, activity_usage_kwh, hour, duration):
                                 https://www.caiso.com/Documents/GreenhouseGasEmissionsTracking-Methodology.pdf
     """
 
-    # activities = set(ACTIVITY_USAGE_KWH.keys())
-
-    # if activity not in activities:
-    #     raise ValueError('activity must be one of {}. Received {}'.format(str(activities), activity))
-
     # Get forecasted supply results at requested hour
     current_hour = datetime.now(timezone('US/Pacific')).hour # [0, 23]
     if (hour.split(':')[0] == '12' and hour[-2:] == 'am'):
@@ -46,10 +41,17 @@ def compute_co2(results, activity_usage_kwh, hour, duration):
     # Get forecasted generation mix
     #   --> approximating fossil fuel as only natural gas
     #   --> approximating other as only imports
-    nat_gas_mwh = results['fossil_fuel'][hours_until_given_hour] # need .tolist() if calling locally
-    imports_mwh = results['other'][hours_until_given_hour]
-    renewables_mwh = results['renewable'][hours_until_given_hour]
-    total_supply = nat_gas_mwh + imports_mwh + renewables_mwh
+    #   --> hydro, solar, wind, and battery don't produce emissions
+    #   --> assuming renewable_other (biomass, biogas) produce negligible emissions compared to ng/imports
+    nat_gas_mwh = results['fossil_fuel'][hours_until_given_hour] # natural gas
+    imports_mwh = results['other'][hours_until_given_hour] # imports
+    hydro_mwh = results['hydro'][hours_until_given_hour]
+    renewable_other_mwh = results['renewable_other'][hours_until_given_hour]
+    solar_mwh = results['solar'][hours_until_given_hour]
+    wind_mwh = results['wind'][hours_until_given_hour]
+    battery_mwh = results['battery'][hours_until_given_hour]
+    total_supply = nat_gas_mwh + imports_mwh + hydro_mwh + renewable_other_mwh + \
+                    solar_mwh + wind_mwh + battery_mwh
 
     # Estimate energy usage
     nat_gas_emissions_factor = 898 * 1e-3 # (lb CO2 / MWh) x (1 MWh / 10^3 kWh) = lb CO2 / kWh
@@ -174,7 +176,8 @@ def merge_data(genmix_data, weather_data):
 
     # Join data by datetime
     full_data = genmix.merge(weather.set_index('date_time_hourly'),on='date_time_hourly',how='inner')
-    full_data_sorted = full_data.sort_values(by='date_time_hourly')
+    # full_data_sorted = full_data.sort_values(by='date_time_hourly')
+    full_data_sorted = full_data.sort_values(by='date_time_5min')
 
     # return full_data
     return full_data_sorted
