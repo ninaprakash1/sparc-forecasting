@@ -13,6 +13,8 @@ from wwo_hist import retrieve_hist_data
 
 GENMIX_CSV = "genmix.csv"
 
+WEATHER_CSV = "california.csv"
+
 
 def compute_co2(results, activity_usage_kwh, hour, duration):
     """
@@ -104,15 +106,34 @@ def get_suppy_data(day):
 
 def get_weather_data(start_date, end_date, api_key):
     """ TODO: Some logic here to not hit API if prediction gauranteed recent """
-    hist_weather_data = retrieve_hist_data(api_key,
-                                ['california'],
-                                start_date,
-                                end_date,
-                                1,
-                                location_label = False,
-                                export_csv = False,
-                                store_df = True)[0]
-    return hist_weather_data
+    cached_data = None
+    try:
+        cached_data = pd.read_csv(WEATHER_CSV)
+        max_date = datetime.strptime(max(cached_data['date_time'])[:10], '%Y-%m-%d')
+
+        if max_date < datetime.strptime(start_date, '%d-%b-%Y'):
+            start_date = (max_date + timedelta(days=1)).strftime("%d-%b-%Y")
+
+    except Exception as e:
+        cached_data = pd.DataFrame()
+        max_date = datetime.strptime(start_date, '%d-%b-%Y')
+
+    if datetime.strptime(end_date, '%d-%b-%Y') > max_date:
+        new_df = retrieve_hist_data(api_key, ['california'], start_date, end_date, 1, location_label=False,
+                                    export_csv=False, store_df=True)[0]
+    else:
+        new_df = pd.DataFrame()
+
+    cached_data = pd.concat([cached_data, new_df])
+
+    time.sleep(0.1)
+    cached_data.to_csv(WEATHER_CSV)
+
+    n = (datetime.strptime(end_date, '%d-%b-%Y')  - datetime.strptime(start_date, '%d-%b-%Y')).days
+    # Filter only last n * 24 hours
+    weather_data = cached_data.tail(int(n * 24 * 60 / 5))
+
+    return weather_data
 
 
 def get_genmix_data(day_strings, n):
