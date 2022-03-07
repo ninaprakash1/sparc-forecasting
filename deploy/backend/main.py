@@ -47,10 +47,6 @@ def train_models(param_str: str):
 
     try: 
         train(num_days)
-
-        logging.info(f"Renewable test: {test_model('./skforecast1hr/renewable_forecaster1hr.py')}")
-        logging.info(f"Fossil test: {test_model('./skforecast1hr/fossil_fuel_forecaster1hr.py')}")
-        logging.info(f"Other test: {test_model('./skforecast1hr/other_forecaster1hr.py')}")
         
         return {"result": f"Retrain Successful!"}
     except Exception as e:
