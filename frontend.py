@@ -175,12 +175,3 @@ if (clicked_generate):
         # st.pyplot(fig3)
 
 clicked_generate = False
-
-retrain = st.button('Retrain model')
-if (retrain):
-    with st.empty():
-        st.write(f"Retraining...")
-
-        res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/train/days=5")
-        train_result = json.loads(res.text)['result']
-        st.success(train_result)

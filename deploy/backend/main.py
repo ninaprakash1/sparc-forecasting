@@ -37,7 +37,7 @@ def read_root():
 def train_models(param_str: str):
     """ Experimental endpoint to retrain models, accepts param str """
     logging.info(f"Recieved request for retrain with param_str: {param_str}")
-    num_days = 24
+    num_days = 30
     logging.info(f",,{param_str.count('days=')}")
     if param_str.count("days=") == 1:
         num_days = int(param_str.split("days=")[1].strip())
