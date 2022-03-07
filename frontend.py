@@ -179,7 +179,7 @@ if (clicked_generate):
             st.pyplot(fig2)
 
             st.subheader('Forecasted Generation Mix 24 hours from now')
-            time_idx = np.arange(1,25).astype(int)
+            time_idx = np.arange(1,len(results['solar'])+1).astype(int)
 
             colors = {'solar': '#E3D18A','wind':'#02475E', 'hydro': '#FFE9D6', 'renewable_other': '#A7D0CD', 'battery': '#222a2a', 'fossil_fuel': '#7B6079','other': '#DE8971'}
 
