@@ -18,7 +18,7 @@ def generate_graph_historical_and_forecasted():
     hydro = ['Small hydro', 'Large Hydro']
     renewable_other = ['Geothermal', 'Biomass', 'Biogas', 'Nuclear']
 
-    colors_grouped = ['#2e91e5','#e15f99','#1ca71c', '#fb0d0d', '#da16ff', '#222a2a','#b68100']
+    colors_grouped = ['#E3D18A','#02475E','#FFE9D6', '#A7D0CD', '#222a2a', '#7B6079','#DE8971']
     colors_detailed = ['green','gray','brown','purple','orange','red','yellow','black','blue','pink','teal','lawngreen','indigo']
 
     """
@@ -27,7 +27,7 @@ def generate_graph_historical_and_forecasted():
 
     # Get most recent CAISO data, then filter for today only
     data2 = get_last_n_days(1)
-    length_today_only = int(60/5 * datetime.now(timezone('US/Pacific')).hour)
+    length_today_only = int(60/5 * datetime.now(timezone('US/Pacific')).hour) + 1
     data2 = data2.tail(length_today_only)
 
     # Add grouped columns

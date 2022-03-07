@@ -1,10 +1,10 @@
-import json
-import requests
 import streamlit as st
 from utils import generate_graph_historical_and_forecasted
 from deploy.backend.utils import compute_co2
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
+import numpy as np
+import pandas as pd
 
 ###
 # Main app components
@@ -122,9 +122,9 @@ if (clicked_generate):
         mode = 'gauge',
         gauge = {
             'shape' : 'angular',
-            'steps':[{'range':[0,33*5], 'color':'#37a706'},
-                    {'range':[33*5,67*5], 'color':'#e1ed41'},
-                    {'range':[67*5,100*5], 'color':'#D82E3F'}],
+            'steps':[{'range':[0,33*5], 'color': '#95CD41'}, # '#37a706'
+                    {'range':[33*5,67*5], 'color': '#FFF89A'}, # '#e1ed41'
+                    {'range':[67*5,100*5], 'color': '#D9534F'}], # '#DD4A48'}], # '#D82E3F'
             'bar':{'color':'black', 'thickness':0.0},
             'threshold':{'line':{'width':8, 'color':'black'}
                         ,'thickness':0.8, 'value':co2},
@@ -178,7 +178,28 @@ if (clicked_generate):
             st.subheader('Historical and Predicted Generation Mix')
             st.pyplot(fig2)
 
-        # st.subheader('Historical (Detailed) and Predicted Generation Mix')
-        # st.pyplot(fig3)
+            st.subheader('Forecasted Generation Mix 24 hours from now')
+            time_idx = np.arange(1,25).astype(int)
+
+            colors = {'solar': '#E3D18A','wind':'#02475E', 'hydro': '#FFE9D6', 'renewable_other': '#A7D0CD', 'battery': '#222a2a', 'fossil_fuel': '#7B6079','other': '#DE8971'}
+
+            results = pd.DataFrame(results)
+            results_perc = results.drop(columns=['time','total']).div(results.drop(columns=['time','total']).sum(axis=1),axis=0).round(3) * 100
+
+            fig = go.Figure()
+            fig.add_bar(name='Solar', x= time_idx, y=results_perc['solar'], marker_color=colors['solar']) # , text=results_perc['solar'],textposition='auto',)
+            fig.add_bar(name='Wind', x= time_idx, y=results_perc['wind'], marker_color=colors['wind']) # , text=results_perc['wind'],textposition='auto',)
+            fig.add_bar(name='Hydro', x= time_idx, y=results_perc['hydro'], marker_color=colors['hydro']) # , text=results_perc['hydro'],textposition='auto',)
+            fig.add_bar(name='Other Renewables', x= time_idx, y=results_perc['renewable_other'],
+                    marker_color = colors['renewable_other']) #, text = results_perc['renewable_other'],)
+            fig.add_bar(name='Battery', x= time_idx, y=results_perc['battery'], marker_color=colors['battery']) # , text=results_perc['battery'],textposition='auto',)
+            fig.add_bar(name  = 'Fossil Fuels', x = time_idx, y= results_perc['fossil_fuel'], marker_color = colors['fossil_fuel']) #, text = results_perc['fossil_fuel'])
+            fig.add_bar(name  = 'Other', x = time_idx, y= results_perc['other'], marker_color = colors['other']) #, text = results_perc['other'])
+            fig.update_layout(barmode='relative', plot_bgcolor='rgba(0,0,0,0)',bargap=0.01, legend=dict(
+                orientation="h",yanchor="bottom",y=1.02,xanchor="center", x=0.5))
+            fig.update_xaxes(title = 'Hour')
+            fig.update_yaxes(range=[0,100], title = 'Percentage')
+
+            st.plotly_chart(fig)
 
 clicked_generate = False

@@ -106,7 +106,7 @@ def get_suppy_data(day):
     return csv
 
 
-def get_weather_data(start_date, end_date, api_key):
+def get_weather_data(start_date, end_date, api_key, n):
     """ TODO: Some logic here to not hit API if prediction gauranteed recent """
     cached_data = None
     try:
@@ -115,7 +115,7 @@ def get_weather_data(start_date, end_date, api_key):
 
         if max_date < datetime.strptime(start_date, '%d-%b-%Y'):
             start_date = (max_date + timedelta(days=1)).strftime("%d-%b-%Y")
-
+    
     except Exception as e:
         cached_data = pd.DataFrame()
         max_date = datetime.strptime(start_date, '%d-%b-%Y')
@@ -131,7 +131,7 @@ def get_weather_data(start_date, end_date, api_key):
     time.sleep(0.1)
     cached_data.to_csv(WEATHER_CSV)
 
-    n = (datetime.strptime(end_date, '%d-%b-%Y')  - datetime.strptime(start_date, '%d-%b-%Y')).days
+    # n = (datetime.strptime(end_date, '%d-%b-%Y')  - datetime.strptime(start_date, '%d-%b-%Y')).days
     # Filter only last n * 24 hours
     weather_data = cached_data.tail(int(n * 24 * 60 / 5))
 
@@ -154,7 +154,7 @@ def get_genmix_data(day_strings, n):
 
     for day in tqdm(day_strings):
         data = get_suppy_data(day)
-        new_df = pd.read_csv(data, sep=",")
+        new_df = pd.read_csv(data, sep=",", on_bad_lines='skip')
         new_df['Day'] = [day for r in range(len(new_df['Time']))]
 
         # Remove all today's data and replace it
@@ -216,14 +216,14 @@ def get_last_n_days(n):
     """
     # 1. Get list of days representing the last n * 24 hours from current hour
     day_strings, start_date, end_date = get_day_strings(n)
-    
+
     # 2. Get generation mix data from CAISO
     genmix_data = get_genmix_data(day_strings, n)
 
     # 3. Get weather data
-    api_key = '8d0e4b3d61f149e095124908222101'
-    weather_data = get_weather_data(start_date, end_date, api_key)
-    
+    api_key = '303ce611b884478ebc873437220703' # '8d0e4b3d61f149e095124908222101'
+    weather_data = get_weather_data(start_date, end_date, api_key, n)
+
     # 4. Merge genmix and weather data
     last_n_days = merge_data(genmix_data, weather_data)
     
