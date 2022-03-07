@@ -196,7 +196,7 @@ def merge_data(genmix_data, weather_data):
     weather = weather[weather_cols]
 
     logging.info(f"*^* {weather['date_time_hourly'].dtype} {genmix['date_time_hourly'].dtype}")
-    print("***", weather['date_time_hourly'].dtype, genmix['date_time_hourly'].dtype)
+    logging.info(weather['date_time_hourly'][:10])
 
     # Join data by datetime
     full_data = genmix.merge(weather.set_index('date_time_hourly'),on='date_time_hourly',how='inner')
