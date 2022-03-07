@@ -99,6 +99,7 @@ clicked_generate = st.button('Generate Forecast')
 
 if (clicked_generate):
     # Make call to model
+    co2 = None
 
     with st.empty():
         st.write(f"Gathering prediction...")
@@ -170,9 +171,10 @@ if (clicked_generate):
 
     st.markdown(pred_alignment, unsafe_allow_html=True)
 
-    with st.expander("Click to see the forecast results"):
-        st.subheader('Historical and Predicted Generation Mix')
-        st.pyplot(fig2)
+    if fig2:
+        with st.expander("Click to see the forecast results"):
+            st.subheader('Historical and Predicted Generation Mix')
+            st.pyplot(fig2)
 
         # st.subheader('Historical (Detailed) and Predicted Generation Mix')
         # st.pyplot(fig3)
