@@ -87,7 +87,7 @@ choice = st.radio("Pick one",["Use default energy consumption of {}: {} kWh".for
                                                                              ACTIVITY_USAGE_KWH[activity]), "Enter my own"])
 
 if (choice == "Enter my own"):
-    energy_cons = st.text_input("Energy consumption of {} (kW):".format(activity_present_tense[activity]), ACTIVITY_USAGE_KWH[activity], max_chars=10)
+    energy_cons = st.text_input(f"Energy consumption of {activity_present_tense[activity]} (kW):", ACTIVITY_USAGE_KWH[activity], max_chars=10)
     try:
         energy_cons = float(energy_cons)
     except:
@@ -111,9 +111,9 @@ if (clicked_generate):
             st.error("No results from model...")
 
     # Write output
-    st.subheader('To {} at {} for {}, you will produce: '.format(activity[0].lower() + activity[1:], hour, duration))
-
-    st.header('%.1f lb CO2' %(co2),anchor='prediction')
+    st.subheader(f'To {activity[0].lower() + activity[1:]} at {hour} for {duration}, you will produce: ')
+    
+    st.header(f'{co2} lb CO2' ,anchor='prediction')
 
     fig = go.Figure()
     fig.add_trace(go.Indicator(
