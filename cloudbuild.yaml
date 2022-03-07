@@ -17,11 +17,5 @@
    - '--region'
    - 'us-west1'
    - '--allow-unauthenticated'
-  - name: 'gcr.io/cloud-builders/gcloud'
-    entrypoint: gcloud
-    args:
-    - 'app'
-    - 'deploy'
-    - 'cron.yaml'
  images:
  - 'gcr.io/$PROJECT_ID/sparc-cloud-run:$COMMIT_SHA'
