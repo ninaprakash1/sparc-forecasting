@@ -107,7 +107,7 @@ if (clicked_generate):
             co2 = compute_co2(results, energy_cons, hour, duration)
             st.success('Model run complete')
         else:
-            st.failure("No results from model...")
+            st.error("No results from model...")
 
     # Write output
     st.subheader('To {} at {} for {}, you will produce: '.format(activity[0].lower() + activity[1:], hour, duration))
