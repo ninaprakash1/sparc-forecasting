@@ -48,6 +48,9 @@ def train(num_days=30):
         forecaster.fit(y=data)
 
         # Save model
-        dump(forecaster, filename= './skforecast1hr/'+ feat_col +'_forecaster1hr.py')
+        if './skforecast1hr' not in os.listdir():
+            os.mkdir('skforecast1hr')
+            
+        dump(forecaster, filename= f'./skforecast1hr/{feat_col}_forecaster1hr.py')
 
     logging.info(f"{['./skforecast1hr/' + x for x in os.listdir('./skforecast1hr')]}")
