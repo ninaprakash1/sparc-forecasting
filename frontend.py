@@ -135,7 +135,9 @@ if (clicked_generate):
 
     st.plotly_chart(fig)
 
-    if (co2 < 33 * 5):
+    if not co2:
+        pass
+    elif (co2 < 33 * 5):
         pred_alignment = """
         <style>
         #prediction {
