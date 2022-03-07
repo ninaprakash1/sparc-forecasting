@@ -194,6 +194,7 @@ def merge_data(genmix_data, weather_data):
     # Define weather columns to keep
     weather_cols = ['date_time_hourly','tempC', 'uvIndex','WindGustKmph','cloudcover','humidity','precipMM']
     weather = weather[weather_cols]
+    weather['date_time_hourly'] = pd.to_datetime(weather.date_time_hourly)
 
     logging.info(f"*^* {weather['date_time_hourly'].dtype} {genmix['date_time_hourly'].dtype}")
     logging.info(weather['date_time_hourly'][:10])
