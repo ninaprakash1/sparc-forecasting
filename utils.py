@@ -69,11 +69,12 @@ def generate_graph_historical_and_forecasted():
         hours_from_pred.append(data2.iloc[-1]['date_time_5min'] + timedelta(hours=i))
     
     results['time'] = hours_from_pred
+    logging.info("Time", results)
 
-    for source_type in ['fossil_fuel','solar','wind','hydro','renewable_other','battery','other']:
+    for i, source_type in enumerate(['fossil_fuel','solar','wind','hydro','renewable_other','battery','other']):
         lst = results[source_type]
-        ax2.plot(results['time'], lst)
-        ax3.plot(results['time'], lst)
+        ax2.plot(results['time'], lst, c=colors_grouped[i])
+        ax3.plot(results['time'], lst, c=colors_detailed[i])
 
         # Add a vertical line
     for ax in ([ax2, ax3]):
