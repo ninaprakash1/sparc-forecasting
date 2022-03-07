@@ -54,7 +54,7 @@ def generate_graph_historical_and_forecasted():
     res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/predict")
     logging.info('\n\n\nresult of call: ', res.text, '\n\n\n')
 
-    if 'result' not in str(res.text):
+    if 'result' not in str(res.text) or type(json.loads(res.text)['result']['battery']) == int:
         logging.error("Nothing returned from endpoint")
         logging.info(res)
         logging.info(res.text)
