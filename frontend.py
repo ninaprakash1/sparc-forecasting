@@ -171,9 +171,9 @@ if (clicked_generate):
         </style>
         """
 
-    st.markdown(pred_alignment, unsafe_allow_html=True)
-
     if fig2:
+        st.markdown(pred_alignment, unsafe_allow_html=True)
+        
         with st.expander("Click to see the forecast results"):
             st.subheader('Historical and Predicted Generation Mix')
             st.pyplot(fig2)
