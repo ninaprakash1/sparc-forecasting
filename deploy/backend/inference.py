@@ -8,7 +8,7 @@ def predict():
 	logging.info("Logging prediction hit")
 
 	import os
-	logging.info(f"{os.listdir()}, --> {os.listdir('./skforecast1hr')}")
+	logging.info(f"{['./skforecast1hr/' + x for x in os.listdir('./skforecast1hr')]}")
 
 	try:
 		# Load models - check train.py for aggregated columns
@@ -34,7 +34,7 @@ def predict():
 	
 	except Exception as e:
 		logging.error(e)
-		return {'battery': 0, 'fossil_fuel': 0, 'hydro': 0, 'other': 0, 'renewable_other': 0, 'solar': 0, 'wind': 0, 'total': 0}
+		return {}
 
 	return {'battery':pred_battery, 'fossil_fuel': pred_ff, 'hydro': pred_hydro, 'other': pred_other,
 			'renewable_other': pred_renewable_o, 'solar': pred_solar, 'wind': pred_wind, 'total': pred_total}

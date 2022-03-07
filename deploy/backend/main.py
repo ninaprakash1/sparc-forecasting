@@ -14,20 +14,20 @@ from utils import test_model
 
 app = FastAPI()
 
-origins = [
-    'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
-    'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app',
-    'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
-    'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app'
-]
+# origins = [
+#     'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
+#     'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app',
+#     'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
+#     'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app'
+# ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 """ Class Definition Here? (store models in state)"""
 @app.get("/predict")
