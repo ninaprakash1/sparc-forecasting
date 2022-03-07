@@ -4,6 +4,7 @@ import requests
 from datetime import datetime, timedelta
 from pytz import timezone
 import json
+import logging
 
 from deploy.backend.utils import get_last_n_days
 
@@ -53,7 +54,11 @@ def generate_graph_historical_and_forecasted():
     # Add the forecasting results
     res = requests.get(f"https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/predict")
     print('\n\n\nresult of call: ', res.text, '\n\n\n')
-    res = json.loads(res.text)['result']
+    if not res.text:
+        logging.info("Nothing returned from endpoint")
+        res = {}
+    else:
+        res = json.loads(res.text)['result']
     results = {grouped_source: list(res[grouped_source].values()) for grouped_source in res.keys()}
     
     hours_from_pred = []
