@@ -5,8 +5,22 @@ from datetime import datetime, timedelta
 from pytz import timezone
 import json
 import logging
+import pandas as pd
 
 from deploy.backend.utils import get_last_n_days
+
+def get_recommendation(results):
+
+    results = pd.DataFrame(results)
+
+    # normalize results for graphing
+    results_perc = results.drop(columns=['time','total']).div(results.drop(columns=['time','total']).sum(axis=1),axis=0).round(3) * 100
+
+    # get time with smallest fossil fuel and other usage
+    min_indx = results[['fossil_fuel','other']].sum(axis=1).idxmin()
+    recommended_time = results.iloc[min_indx]['time']
+
+    return results_perc, recommended_time
 
 def generate_graph_historical_and_forecasted():
     genmix_vars = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas', 'Small hydro',

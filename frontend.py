@@ -1,10 +1,9 @@
 import streamlit as st
-from utils import generate_graph_historical_and_forecasted
+from utils import generate_graph_historical_and_forecasted, get_recommendation
 from deploy.backend.utils import compute_co2
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 import numpy as np
-import pandas as pd
 
 ###
 # Main app components
@@ -66,22 +65,6 @@ hour = st.selectbox("Select a time in the next 24 hours",
                     index=13)
 
 duration = st.selectbox("Select a duration", ["1 hour"] + [str(i) + " hours" for i in range(2,25)])
-
-# now = datetime.now()
-# end = now + timedelta(hours=24)
-# step = timedelta(hours=1)
-
-# start_time = st.slider(
-#     "Select a time range",
-#      min_value=now,
-#      max_value=end,
-#      value=(now+timedelta(hours=2), now + timedelta(hours=7)),
-#      step=step,
-#      format="MM/DD/YY \n hh:00"
-# )
-
-# testing = st.slider('Select a range', 0,10,(1,2))
-
 
 choice = st.radio("Pick one",["Use default energy consumption of {}: {} kWh".format(activity_present_tense[activity],
                                                                              ACTIVITY_USAGE_KWH[activity]), "Enter my own"])
@@ -183,8 +166,7 @@ if (clicked_generate):
 
             colors = {'solar': '#E3D18A','wind':'#02475E', 'hydro': '#FFE9D6', 'renewable_other': '#A7D0CD', 'battery': '#222a2a', 'fossil_fuel': '#7B6079','other': '#DE8971'}
 
-            results = pd.DataFrame(results)
-            results_perc = results.drop(columns=['time','total']).div(results.drop(columns=['time','total']).sum(axis=1),axis=0).round(3) * 100
+            results_perc, recommended_time = get_recommendation(results)
 
             fig = go.Figure()
             fig.add_bar(name='Solar', x= time_idx, y=results_perc['solar'], marker_color=colors['solar']) # , text=results_perc['solar'],textposition='auto',)
@@ -201,5 +183,8 @@ if (clicked_generate):
             fig.update_yaxes(range=[0,100], title = 'Percentage')
 
             st.plotly_chart(fig)
+
+        with st.expander("Click to see recommendation"):
+            st.subheader(f'Based on the forecast results, it is recommended that you begin {activity_present_tense[activity]} at {recommended_time.strftime("%I:00%p")} on {recommended_time.strftime("%b %d")}')
 
 clicked_generate = False
