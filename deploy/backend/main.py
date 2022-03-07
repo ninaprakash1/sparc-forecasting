@@ -1,9 +1,9 @@
 import uuid
 
 import uvicorn
-from fastapi import File
 from fastapi import FastAPI
-from fastapi import UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+
 import numpy as np
 import logging
 
@@ -14,11 +14,20 @@ from utils import test_model
 
 app = FastAPI()
 
-""" Import Models """
+origins = [
+    'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
+    'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app',
+    'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
+    'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app'
+]
 
-
-""" Load Data """
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 """ Class Definition Here? (store models in state)"""
 @app.get("/predict")

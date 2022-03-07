@@ -23,7 +23,7 @@ def smooth_5min_data(data, kernel_size = 12):
     kernel = np.ones(kernel_size) / kernel_size
     return np.convolve(data, kernel, mode='same')
 
-def train(num_days=60):
+def train(num_days=30):
     df_train = get_last_n_days(num_days)
 
     dfs_train = df_train.copy()
