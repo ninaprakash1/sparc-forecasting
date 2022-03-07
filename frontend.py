@@ -113,7 +113,7 @@ if (clicked_generate):
     # Write output
     st.subheader(f'To {activity[0].lower() + activity[1:]} at {hour} for {duration}, you will produce: ')
     
-    st.header(f'{co2} lb CO2' ,anchor='prediction')
+    st.header('%0.1f lb CO2' %(co2) ,anchor='prediction')
 
     fig = go.Figure()
     fig.add_trace(go.Indicator(
