@@ -1,0 +1,4 @@
+cron:
+- description: "Hourly Retrain Job"
+  url: /train/
+  schedule: every 60 minutes
