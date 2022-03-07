@@ -87,7 +87,7 @@ choice = st.radio("Pick one",["Use default energy consumption of {}: {} kWh".for
                                                                              ACTIVITY_USAGE_KWH[activity]), "Enter my own"])
 
 if (choice == "Enter my own"):
-    energy_cons = st.text_input(f"Energy consumption of {activity_present_tense[activity]} (kW):", ACTIVITY_USAGE_KWH[activity], max_chars=10)
+    energy_cons = st.text_input(f"Energy consumption of {activity_present_tense[activity]} (kW):", ACTIVITY_USAGE_KWH[activity])
     try:
         energy_cons = float(energy_cons)
     except:
@@ -173,7 +173,7 @@ if (clicked_generate):
 
     if fig2:
         st.markdown(pred_alignment, unsafe_allow_html=True)
-        
+
         with st.expander("Click to see the forecast results"):
             st.subheader('Historical and Predicted Generation Mix')
             st.pyplot(fig2)
