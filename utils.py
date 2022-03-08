@@ -12,25 +12,6 @@ from deploy.backend.utils import get_last_n_days
 colors = {'solar': '#E3D18A','wind':'#02475E', 'hydro': '#FFE9D6', 'renewable_other': '#A7D0CD', 'battery': '#222a2a', 'fossil_fuel': '#7B6079','other': '#DE8971'}
 
 def plot_gauge(co2_perc):
-    # fig = go.Figure()
-    # fig.add_trace(go.Indicator(
-    #     domain = {'x':[0,1], 'y':[0,1]},
-    #     value = co2,
-    #     mode = 'gauge',
-    #     gauge = {
-    #         'shape' : 'angular',
-    #         'steps':[{'range':[0,33*5], 'color': '#95CD41'}, # '#37a706'
-    #                 {'range':[33*5,67*5], 'color': '#FFF89A'}, # '#e1ed41'
-    #                 {'range':[67*5,100*5], 'color': '#D9534F'}], # '#DD4A48'}], # '#D82E3F'
-    #         'bar':{'color':'black', 'thickness':0.0},
-    #         'threshold':{'line':{'width':8, 'color':'black'}
-    #                     ,'thickness':0.8, 'value':co2},
-    #         'axis':{'range':[None,500]}
-    #     }
-    
-    # ))
-    # return fig
-
     fig = go.Figure()
     fig.add_trace(go.Indicator(
         domain = {'x':[0,1], 'y':[0,1]},
@@ -53,8 +34,9 @@ def plot_gauge(co2_perc):
 def plot_hourly_barchart(results):
     time_idx = np.arange(1,len(results['solar'])+1).astype(int)
 
-    results_perc, recommended_time = get_recommendation(results)
-
+    results = pd.DataFrame(results)
+    results_perc = results.drop(columns=['time','total']).div(results.drop(columns=['time','total']).sum(axis=1),axis=0).round(3) * 100
+    
     fig = go.Figure()
     fig.add_bar(name='Solar', x= time_idx, y=results_perc['solar'], marker_color=colors['solar'])
     fig.add_bar(name='Wind', x= time_idx, y=results_perc['wind'], marker_color=colors['wind'])
@@ -69,24 +51,11 @@ def plot_hourly_barchart(results):
     fig.update_xaxes(title = 'Hour')
     fig.update_yaxes(range=[0,100], title = 'Percentage')
 
-    return fig, recommended_time
+    return fig
 
 def smooth_5min_data(data, kernel_size = 12):
     kernel = np.ones(kernel_size) / kernel_size
     return np.convolve(data, kernel, mode='same')
-
-def get_recommendation(results):
-
-    results = pd.DataFrame(results)
-
-    # normalize results for graphing
-    results_perc = results.drop(columns=['time','total']).div(results.drop(columns=['time','total']).sum(axis=1),axis=0).round(3) * 100
-
-    # get time with smallest fossil fuel and other usage
-    min_indx = results[['fossil_fuel','other']].sum(axis=1).idxmin()
-    recommended_time = results.iloc[min_indx]['time']
-
-    return results_perc, recommended_time
 
 def generate_graph_historical_and_forecasted():
 
@@ -137,8 +106,6 @@ def generate_graph_historical_and_forecasted():
     data2_temp = data2_temp.rename(columns={'date_time_5min': 'time', 'Fossil Fuels':'fossil_fuel','Solar':'solar','Wind': 'wind','Hydro':'hydro','Other Renewables':'renewable_other','Batteries':'battery','Other':'other'})
     hist_and_future_concat = pd.concat([data2_temp, results_temp])
 
-    print('max = ', hist_and_future_concat.drop(columns=['time']).values.max())
-
     fig = go.Figure(data = [
         go.Scatter(name='Solar', x= hist_and_future_concat['time'], y=hist_and_future_concat['solar'], marker_color=colors['solar'],mode = 'lines'),
         go.Scatter(name='Wind', x= hist_and_future_concat['time'], y=hist_and_future_concat['wind'], marker_color=colors['wind'],mode = 'lines'),
@@ -146,6 +113,7 @@ def generate_graph_historical_and_forecasted():
         go.Scatter(name='Other Renewables', x= hist_and_future_concat['time'], y=hist_and_future_concat['renewable_other'], marker_color = colors['renewable_other'],mode ='lines'),
         go.Scatter(name='Battery', x= hist_and_future_concat['time'], y=hist_and_future_concat['battery'], marker_color=colors['battery'],mode = 'lines'),
         go.Scatter(name  = 'Fossil Fuels', x = hist_and_future_concat['time'], y= hist_and_future_concat['fossil_fuel'], marker_color = colors['fossil_fuel'], mode = 'lines'),
+        go.Scatter(name = 'Other', x = hist_and_future_concat['time'], y = hist_and_future_concat['other'], marker_color=colors['other'], mode='lines'),
         go.Scatter(name = 'Current Hour', x = [datetime.now(), datetime.now()], y = [0, hist_and_future_concat.drop(columns=['time']).values.max()] , marker_color = 'red', mode = 'lines', line = dict(dash='dash'))
     ])
     fig.update_xaxes(title = 'Hour')

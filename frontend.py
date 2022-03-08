@@ -84,9 +84,9 @@ if (clicked_generate):
     with st.empty():
         st.write(f"Gathering prediction...")
         results, fig2 = generate_graph_historical_and_forecasted()
-        fig3, recommended_time = plot_hourly_barchart(results)
+        fig3 = plot_hourly_barchart(results)
         if results and fig2 and fig3:
-            co2 = compute_co2(results, energy_cons, hour, duration)
+            co2, co2_perc, recommended_time = compute_co2(results, energy_cons, hour, duration)
             st.success('Model run complete')
         else:
             st.error("No results from model...")
@@ -96,13 +96,23 @@ if (clicked_generate):
     
     st.header('%0.1f lb CO2' %(co2) ,anchor='prediction')
 
-    fig = plot_gauge(co2)
+    fig = plot_gauge(co2_perc)
 
     st.plotly_chart(fig)
 
-    if not co2:
+    pred_alignment = """
+        <style>
+        #prediction {
+        text-align: center
+        }
+        #prediction {
+        color: black
+        }
+        </style>
+        """
+    if not co2_perc:
         pass
-    elif (co2 < 33 * 5):
+    elif (co2_perc < 33):
         pred_alignment = """
         <style>
         #prediction {
@@ -113,7 +123,7 @@ if (clicked_generate):
         }
         </style>
         """
-    elif (co2 < 67*5):
+    elif (co2_perc < 67):
         pred_alignment = """
         <style>
         #prediction {

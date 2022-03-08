@@ -45,24 +45,23 @@ def compute_co2(results, activity_usage_kwh, hour, duration):
     #   --> approximating other as only imports
     #   --> hydro, solar, wind, and battery don't produce emissions
     #   --> assuming renewable_other (biomass, biogas) produce negligible emissions compared to ng/imports
-    nat_gas_mwh = results['fossil_fuel'][hours_until_given_hour] # natural gas
-    imports_mwh = results['other'][hours_until_given_hour] # imports
-    hydro_mwh = results['hydro'][hours_until_given_hour]
-    renewable_other_mwh = results['renewable_other'][hours_until_given_hour]
-    solar_mwh = results['solar'][hours_until_given_hour]
-    wind_mwh = results['wind'][hours_until_given_hour]
-    battery_mwh = results['battery'][hours_until_given_hour]
-    total_supply = nat_gas_mwh + imports_mwh + hydro_mwh + renewable_other_mwh + \
-                    solar_mwh + wind_mwh + battery_mwh
+
+    results = pd.DataFrame(results)
+    results['total_supply'] = results[['fossil_fuel','solar','wind','hydro','renewable_other','battery','other']].sum(axis=1)
 
     # Estimate energy usage
     nat_gas_emissions_factor = 898 * 1e-3 # (lb CO2 / MWh) x (1 MWh / 10^3 kWh) = lb CO2 / kWh
     imports_emissions_factor = 0.428 * 4.536e4 * 1e-3 # (mTCO2/MWh) x (lb / mT) * (1 MWh / 10^3 kWh) = lb CO2 / kWh
 
-    co2 = activity_usage_kwh * dur * (nat_gas_mwh / total_supply * nat_gas_emissions_factor + \
-        imports_mwh / total_supply * imports_emissions_factor)
+    co2_24hours = activity_usage_kwh * dur * (results['fossil_fuel'] / results['total_supply'] * nat_gas_emissions_factor + \
+        results['other'] / results['total_supply'] * imports_emissions_factor)
 
-    return co2 # lb
+    co2 = co2_24hours.iloc[hours_until_given_hour]
+    co2_perc = (co2 - co2_24hours.min()) / (co2_24hours.max() - co2_24hours.min()) * 100
+
+    recommended_time = results.iloc[co2_24hours.idxmin()]['time']
+
+    return co2, co2_perc, recommended_time # lb
 
 
 def get_day_strings(n):
