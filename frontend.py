@@ -1,9 +1,6 @@
 import streamlit as st
-from utils import generate_graph_historical_and_forecasted, get_recommendation
+from utils import generate_graph_historical_and_forecasted, plot_hourly_barchart, plot_gauge
 from deploy.backend.utils import compute_co2
-from datetime import datetime, timedelta
-import plotly.graph_objects as go
-import numpy as np
 
 ###
 # Main app components
@@ -20,7 +17,7 @@ st.set_page_config(
 st.image(energy_img)
 
 st.title('SPARC')
-st.header('{ Save Power and Reduce Carbon }')
+st.header('{ Schedule Power and Reduce Carbon }')
 st.sidebar.markdown("## About SPARC California")
 st.sidebar.markdown("Welcome to SPARC California! This app allows you to see the forecasted carbon emissions of common daily activities.")
 st.sidebar.markdown("At any moment, the electricity that we use from the grid comes from a mix of many sources, from natural gas to solar to nuclear depending on resource availability, weather, time, day, and season. The more nonrenewable resources are used to provide energy to the grid, the more CO2 emissions are produced.")
@@ -86,7 +83,8 @@ if (clicked_generate):
 
     with st.empty():
         st.write(f"Gathering prediction...")
-        results, fig2, fig3 = generate_graph_historical_and_forecasted()
+        results, fig2 = generate_graph_historical_and_forecasted()
+        fig3, recommended_time = plot_hourly_barchart(results)
         if results and fig2 and fig3:
             co2 = compute_co2(results, energy_cons, hour, duration)
             st.success('Model run complete')
@@ -98,23 +96,7 @@ if (clicked_generate):
     
     st.header('%0.1f lb CO2' %(co2) ,anchor='prediction')
 
-    fig = go.Figure()
-    fig.add_trace(go.Indicator(
-        domain = {'x':[0,1], 'y':[0,1]},
-        value = co2,
-        mode = 'gauge',
-        gauge = {
-            'shape' : 'angular',
-            'steps':[{'range':[0,33*5], 'color': '#95CD41'}, # '#37a706'
-                    {'range':[33*5,67*5], 'color': '#FFF89A'}, # '#e1ed41'
-                    {'range':[67*5,100*5], 'color': '#D9534F'}], # '#DD4A48'}], # '#D82E3F'
-            'bar':{'color':'black', 'thickness':0.0},
-            'threshold':{'line':{'width':8, 'color':'black'}
-                        ,'thickness':0.8, 'value':co2},
-            'axis':{'range':[None,500]}
-        }
-    
-    ))
+    fig = plot_gauge(co2)
 
     st.plotly_chart(fig)
 
@@ -154,35 +136,15 @@ if (clicked_generate):
         </style>
         """
 
-    if fig2:
+    if fig2 and fig3:
         st.markdown(pred_alignment, unsafe_allow_html=True)
 
         with st.expander("Click to see the forecast results"):
             st.subheader('Historical and Predicted Generation Mix')
-            st.pyplot(fig2)
+            st.plotly_chart(fig2)
 
             st.subheader('Forecasted Generation Mix 24 hours from now')
-            time_idx = np.arange(1,len(results['solar'])+1).astype(int)
-
-            colors = {'solar': '#E3D18A','wind':'#02475E', 'hydro': '#FFE9D6', 'renewable_other': '#A7D0CD', 'battery': '#222a2a', 'fossil_fuel': '#7B6079','other': '#DE8971'}
-
-            results_perc, recommended_time = get_recommendation(results)
-
-            fig = go.Figure()
-            fig.add_bar(name='Solar', x= time_idx, y=results_perc['solar'], marker_color=colors['solar']) # , text=results_perc['solar'],textposition='auto',)
-            fig.add_bar(name='Wind', x= time_idx, y=results_perc['wind'], marker_color=colors['wind']) # , text=results_perc['wind'],textposition='auto',)
-            fig.add_bar(name='Hydro', x= time_idx, y=results_perc['hydro'], marker_color=colors['hydro']) # , text=results_perc['hydro'],textposition='auto',)
-            fig.add_bar(name='Other Renewables', x= time_idx, y=results_perc['renewable_other'],
-                    marker_color = colors['renewable_other']) #, text = results_perc['renewable_other'],)
-            fig.add_bar(name='Battery', x= time_idx, y=results_perc['battery'], marker_color=colors['battery']) # , text=results_perc['battery'],textposition='auto',)
-            fig.add_bar(name  = 'Fossil Fuels', x = time_idx, y= results_perc['fossil_fuel'], marker_color = colors['fossil_fuel']) #, text = results_perc['fossil_fuel'])
-            fig.add_bar(name  = 'Other', x = time_idx, y= results_perc['other'], marker_color = colors['other']) #, text = results_perc['other'])
-            fig.update_layout(barmode='relative', plot_bgcolor='rgba(0,0,0,0)',bargap=0.01, legend=dict(
-                orientation="h",yanchor="bottom",y=1.02,xanchor="center", x=0.5))
-            fig.update_xaxes(title = 'Hour')
-            fig.update_yaxes(range=[0,100], title = 'Percentage')
-
-            st.plotly_chart(fig)
+            st.plotly_chart(fig3)
 
         with st.expander("Click to see recommendation"):
             st.subheader(f'Based on the forecast results, it is recommended that you begin {activity_present_tense[activity]} at {recommended_time.strftime("%I:00%p")} on {recommended_time.strftime("%b %d")}')
