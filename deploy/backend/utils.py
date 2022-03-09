@@ -61,6 +61,11 @@ def compute_co2(results, activity_usage_kwh, hour, duration):
 
     recommended_time = results.iloc[co2_24hours.idxmin()]['time']
 
+    ### another way to get recommended time ###
+    # get time with smallest fossil fuel and other usage
+    min_indx = results[['fossil_fuel','other']].sum(axis=1).idxmin()
+    recommended_time_other = results.iloc[min_indx]['time']
+
     return co2, co2_perc, recommended_time # lb
 
 

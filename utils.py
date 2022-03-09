@@ -74,7 +74,7 @@ def generate_graph_historical_and_forecasted():
     data2 = data2.tail(length_today_only)
 
     # cut off the last few minutes to round to the nearest hour
-    data2 = data2.head(len(data2) - int(datetime.now().minute / 5))
+    data2 = data2.head(len(data2) - int(datetime.now(timezone('US/Pacific')).minute / 5))
 
     # Add grouped columns
     data2['Fossil Fuels'] = data2[fossil_fuel].sum(axis=1)
@@ -114,7 +114,7 @@ def generate_graph_historical_and_forecasted():
         go.Scatter(name='Battery', x= hist_and_future_concat['time'], y=hist_and_future_concat['battery'], marker_color=colors['battery'],mode = 'lines'),
         go.Scatter(name  = 'Fossil Fuels', x = hist_and_future_concat['time'], y= hist_and_future_concat['fossil_fuel'], marker_color = colors['fossil_fuel'], mode = 'lines'),
         go.Scatter(name = 'Other', x = hist_and_future_concat['time'], y = hist_and_future_concat['other'], marker_color=colors['other'], mode='lines'),
-        go.Scatter(name = 'Current Hour', x = [datetime.now(), datetime.now()], y = [0, hist_and_future_concat.drop(columns=['time']).values.max()] , marker_color = 'red', mode = 'lines', line = dict(dash='dash'))
+        go.Scatter(name = 'Current Hour', x = [datetime.now(timezone('US/Pacific')), datetime.now(timezone('US/Pacific'))], y = [0, hist_and_future_concat.drop(columns=['time']).values.max()] , marker_color = 'red', mode = 'lines', line = dict(dash='dash'))
     ])
     fig.update_xaxes(title = 'Hour')
     fig.update_yaxes(title = 'MW')
