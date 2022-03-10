@@ -14,7 +14,7 @@ Energy data is from the California Independent System Operator (CAISO) and weath
 
 This is a time series forecasting problem where at every hour the features comprise the generation mix in MW per resource (solar, wind, geothermal, biomass, biogas, hydro, nuclear, batteres, imports, and other) and weather data (temperature, UV index, wind speed, cloud cover, humidity, and precipitation).
 
-The output is the forecasted generation mix 24-hours ahead of time.
+The output is the forecasted generation mix 24-hours ahead of time. We use an Skforecast model with XGBoost regressor.
 
 ### Backend: 
 
@@ -32,8 +32,7 @@ Additionally, a cron-job scheduler initiates an hourly retrain step, which was s
 
 ### Frontend
 
-`frontend.py` contains the majority of the Streamlit code, calling `utils.py` when necessary
-
+`frontend.py` contains the majority of the Streamlit code, calling `utils.py` when necessary. The frontend is publicly hosted at https://share.streamlit.io/ninaprakash1/sparc-forecasting/main/frontend.py.
 
 
 ### Resources
