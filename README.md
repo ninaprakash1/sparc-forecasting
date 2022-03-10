@@ -1,6 +1,20 @@
-# cs329s-project
+# SPARC (Schedule Power and Reduce Carbon)
 
-Forecasting the CO<sub>2</sub> emissions of daily activities.
+CS 329s @ Stanford University | Winter 2022
+
+Team Members: Nina Prakash, Kun Guo, Griffin Tarpenning
+
+SPARC is a web application that allows you to get the CO<sub>2</sub> emissions of daily activities at different durations and times of day by forecasting day-ahead generation mix.
+
+### Datasets:
+
+Energy data is from the California Independent System Operator (CAISO) and weather data is from World Weather Online (WWO).
+
+### Modeling:
+
+This is a time series forecasting problem where at every hour the features comprise the generation mix in MW per resource (solar, wind, geothermal, biomass, biogas, hydro, nuclear, batteres, imports, and other) and weather data (temperature, UV index, wind speed, cloud cover, humidity, and precipitation).
+
+The output is the forecasted generation mix 24-hours ahead of time.
 
 ### Backend: 
 
