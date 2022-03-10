@@ -30,15 +30,25 @@ def compute_co2(results, activity_usage_kwh, hour, duration):
     """
 
     # Get forecasted supply results at requested hour
-    current_hour = datetime.now(timezone('US/Pacific')).hour # [0, 23]
-    if (hour.split(':')[0] == '12' and hour[-2:] == 'am'):
+    current_hour = datetime.now(timezone("US/Pacific")).hour  # [0, 23]
+    if hour.split(":")[0] == "12" and hour[-2:] == "am":
         given_hour = 0
-    if (hour.split(':')[0] == '12' and hour[-2:] == 'pm'):
+    if hour.split(":")[0] == "12" and hour[-2:] == "pm":
         given_hour = 12
     else:
-        given_hour = int(hour.split(':')[0]) + 12 if hour[-2:] == 'pm' else int(hour.split(':')[0])
-    hours_until_given_hour = int((datetime.strptime(str(current_hour),'%H') - datetime.strptime(str(given_hour), '%H')).seconds / 3600)
-    dur = int(duration.split(' ')[0])
+        given_hour = (
+            int(hour.split(":")[0]) + 12
+            if hour[-2:] == "pm"
+            else int(hour.split(":")[0])
+        )
+    hours_until_given_hour = int(
+        (
+            datetime.strptime(str(current_hour), "%H")
+            - datetime.strptime(str(given_hour), "%H")
+        ).seconds
+        / 3600
+    )
+    dur = int(duration.split(" ")[0])
 
     # Get forecasted generation mix
     #   --> approximating fossil fuel as only natural gas
@@ -47,52 +57,82 @@ def compute_co2(results, activity_usage_kwh, hour, duration):
     #   --> assuming renewable_other (biomass, biogas) produce negligible emissions compared to ng/imports
 
     results = pd.DataFrame(results)
-    results['total_supply'] = results[['fossil_fuel','solar','wind','hydro','renewable_other','battery','other']].sum(axis=1)
+    results["total_supply"] = results[
+        ["fossil_fuel", "solar", "wind", "hydro", "renewable_other", "battery", "other"]
+    ].sum(axis=1)
 
     # Estimate energy usage
-    nat_gas_emissions_factor = 898 * 1e-3 # (lb CO2 / MWh) x (1 MWh / 10^3 kWh) = lb CO2 / kWh
-    imports_emissions_factor = 0.428 * 4.536e4 * 1e-3 # (mTCO2/MWh) x (lb / mT) * (1 MWh / 10^3 kWh) = lb CO2 / kWh
+    nat_gas_emissions_factor = (
+        898 * 1e-3
+    )  # (lb CO2 / MWh) x (1 MWh / 10^3 kWh) = lb CO2 / kWh
+    imports_emissions_factor = (
+        0.428 * 4.536e4 * 1e-3
+    )  # (mTCO2/MWh) x (lb / mT) * (1 MWh / 10^3 kWh) = lb CO2 / kWh
 
-    co2_24hours = activity_usage_kwh * dur * (results['fossil_fuel'] / results['total_supply'] * nat_gas_emissions_factor + \
-        results['other'] / results['total_supply'] * imports_emissions_factor)
+    co2_24hours = (
+        activity_usage_kwh
+        * dur
+        * (
+            results["fossil_fuel"] / results["total_supply"] * nat_gas_emissions_factor
+            + results["other"] / results["total_supply"] * imports_emissions_factor
+        )
+    )
 
     co2 = co2_24hours.iloc[hours_until_given_hour]
     co2_perc = (co2 - co2_24hours.min()) / (co2_24hours.max() - co2_24hours.min()) * 100
 
-    recommended_time = results.iloc[co2_24hours.idxmin()]['time']
+    recommended_time = results.iloc[co2_24hours.idxmin()]["time"]
 
     ### another way to get recommended time ###
     # get time with smallest fossil fuel and other usage
-    min_indx = results[['fossil_fuel','other']].sum(axis=1).idxmin()
-    recommended_time_other = results.iloc[min_indx]['time']
+    min_indx = results[["fossil_fuel", "other"]].sum(axis=1).idxmin()
+    recommended_time_other = results.iloc[min_indx]["time"]
 
-    return co2, co2_perc, recommended_time # lb
+    return co2, co2_perc, recommended_time  # lb
 
 
 def get_day_strings(n):
     """
     @param      n               Number of historical days starting from today
     @return     day_strings     List of strings in %Y%m%d format for CAISO request representing
-                                most recent n days 
+                                most recent n days
                 start_date      String representing the date of n days ago in %d-%month-%Y format
                                 for wwo_hist request
                 end_date        String representing today's date in %d-%month-%Y format for wwo_hist
                                 request
     """
-    today = datetime.now(timezone('US/Pacific'))
-    
-    day_strings = []
-    day_strings.append(str(today.year) + ('0' + str(today.month))[-2:] + ('0' + str(today.day))[-2:])
-    end_date = ('0' + str(today.day))[-2:] + '-' + today.strftime("%b").upper() + '-' + str(today.year)
+    today = datetime.now(timezone("US/Pacific"))
 
-    hours_remaining = 24*n - today.hour - 1
-    while (hours_remaining > 0):
+    day_strings = []
+    day_strings.append(
+        str(today.year) + ("0" + str(today.month))[-2:] + ("0" + str(today.day))[-2:]
+    )
+    end_date = (
+        ("0" + str(today.day))[-2:]
+        + "-"
+        + today.strftime("%b").upper()
+        + "-"
+        + str(today.year)
+    )
+
+    hours_remaining = 24 * n - today.hour - 1
+    while hours_remaining > 0:
         yesterday = today - timedelta(days=1)
-        day_strings.append(str(yesterday.year) + ('0' + str(yesterday.month))[-2:] + ('0' + str(yesterday.day))[-2:])
+        day_strings.append(
+            str(yesterday.year)
+            + ("0" + str(yesterday.month))[-2:]
+            + ("0" + str(yesterday.day))[-2:]
+        )
         hours_remaining -= 24
         today = yesterday
-    start_date = ('0' + str(today.day))[-2:] + '-' + today.strftime("%b").upper() + '-' + str(today.year)
-        
+    start_date = (
+        ("0" + str(today.day))[-2:]
+        + "-"
+        + today.strftime("%b").upper()
+        + "-"
+        + str(today.year)
+    )
+
     return day_strings[::-1], start_date, end_date
 
 
@@ -101,32 +141,40 @@ def get_suppy_data(day):
     @param      day     String formatted in %Y%m%d to make request to CAISO
     @return     csv     Dataframe of generation mix data on given day
     """
-    caiso = 'http://www.caiso.com/outlook/SP/History/'
+    caiso = "http://www.caiso.com/outlook/SP/History/"
 
     r = requests.get(f"{caiso}{day}/fuelsource.csv?_=1642727187499")
-    soup = bs(r.text, 'html.parser')
+    soup = bs(r.text, "html.parser")
     csv = StringIO(str(soup))
-    
+
     return csv
 
 
 def get_weather_data(start_date, end_date, api_key, n):
-    """ TODO: Some logic here to not hit API if prediction gauranteed recent """
+    """TODO: Some logic here to not hit API if prediction gauranteed recent"""
     cached_data = None
     try:
         cached_data = pd.read_csv(WEATHER_CSV)
-        max_date = datetime.strptime(max(cached_data['date_time'])[:10], '%Y-%m-%d')
+        max_date = datetime.strptime(max(cached_data["date_time"])[:10], "%Y-%m-%d")
 
-        if max_date < datetime.strptime(start_date, '%d-%b-%Y'):
+        if max_date < datetime.strptime(start_date, "%d-%b-%Y"):
             start_date = (max_date + timedelta(days=1)).strftime("%d-%b-%Y")
-    
+
     except Exception as e:
         cached_data = pd.DataFrame()
-        max_date = datetime.strptime(start_date, '%d-%b-%Y')
+        max_date = datetime.strptime(start_date, "%d-%b-%Y")
 
-    if datetime.strptime(end_date, '%d-%b-%Y') > max_date:
-        new_df = retrieve_hist_data(api_key, ['california'], start_date, end_date, 1, location_label=False,
-                                    export_csv=False, store_df=True)[0]
+    if datetime.strptime(end_date, "%d-%b-%Y") > max_date:
+        new_df = retrieve_hist_data(
+            api_key,
+            ["california"],
+            start_date,
+            end_date,
+            1,
+            location_label=False,
+            export_csv=False,
+            store_df=True,
+        )[0]
     else:
         new_df = pd.DataFrame()
 
@@ -147,19 +195,21 @@ def get_genmix_data(day_strings, n):
     try:
         cached_data = pd.read_csv(GENMIX_CSV)
         today = day_strings[-1]
-        day_strings = [x for x in day_strings if int(x) not in cached_data['Day'].values]
+        day_strings = [
+            x for x in day_strings if int(x) not in cached_data["Day"].values
+        ]
 
         """ TODO: Some logic here to not hit API if prediction gauranteed recent """
         day_strings += [today]
-    except Exception as e: 
+    except Exception as e:
         cached_data = pd.DataFrame()
 
     logging.info(f"To Scrape: {day_strings}")
 
     for day in tqdm(day_strings):
         data = get_suppy_data(day)
-        new_df = pd.read_csv(data, sep=",", on_bad_lines='skip')
-        new_df['Day'] = [day for r in range(len(new_df['Time']))]
+        new_df = pd.read_csv(data, sep=",", on_bad_lines="skip")
+        new_df["Day"] = [day for r in range(len(new_df["Time"]))]
 
         # Remove all today's data and replace it
         try:
@@ -169,7 +219,7 @@ def get_genmix_data(day_strings, n):
 
         cached_data = pd.concat([cached_data, new_df])
         time.sleep(0.1)
-    
+
     cached_data.to_csv(GENMIX_CSV)
     # 3. Filter only last n * 24 hours
     genmix_data = cached_data.tail(int(n * 24 * 60 / 5))
@@ -186,24 +236,52 @@ def merge_data(genmix_data, weather_data):
     @param  weather_data    Dataframe representing weather data for last n days
     @return full_data       Dataframe merged by datetime
     """
-    genmix = genmix_data.astype({'Day':str,'Time':str})
-    weather = weather_data.rename(columns={'date_time':'date_time_hourly'})
+    genmix = genmix_data.astype({"Day": str, "Time": str})
+    weather = weather_data.rename(columns={"date_time": "date_time_hourly"})
 
     # Add datetime column to generation mix data
-    genmix['date_time_5min'] = genmix.Day + " " + genmix.Time
+    genmix["date_time_5min"] = genmix.Day + " " + genmix.Time
     genmix.date_time_5min = pd.to_datetime(genmix.date_time_5min)
-    genmix['date_time_hourly'] = genmix.date_time_5min.dt.floor('h')
-    genmix = genmix[['date_time_hourly','date_time_5min','Solar','Wind','Geothermal','Biomass','Biogas','Small hydro','Coal','Nuclear','Batteries','Imports','Other','Natural Gas','Large Hydro']]
+    genmix["date_time_hourly"] = genmix.date_time_5min.dt.floor("h")
+    genmix = genmix[
+        [
+            "date_time_hourly",
+            "date_time_5min",
+            "Solar",
+            "Wind",
+            "Geothermal",
+            "Biomass",
+            "Biogas",
+            "Small hydro",
+            "Coal",
+            "Nuclear",
+            "Batteries",
+            "Imports",
+            "Other",
+            "Natural Gas",
+            "Large Hydro",
+        ]
+    ]
 
     # Define weather columns to keep
-    weather_cols = ['date_time_hourly','tempC', 'uvIndex','WindGustKmph','cloudcover','humidity','precipMM']
+    weather_cols = [
+        "date_time_hourly",
+        "tempC",
+        "uvIndex",
+        "WindGustKmph",
+        "cloudcover",
+        "humidity",
+        "precipMM",
+    ]
     weather = weather[weather_cols]
-    weather['date_time_hourly'] = pd.to_datetime(weather.date_time_hourly)
-    
+    weather["date_time_hourly"] = pd.to_datetime(weather.date_time_hourly)
+
     # Join data by datetime
-    full_data = genmix.merge(weather.set_index('date_time_hourly'),on='date_time_hourly',how='inner')
+    full_data = genmix.merge(
+        weather.set_index("date_time_hourly"), on="date_time_hourly", how="inner"
+    )
     # full_data_sorted = full_data.sort_values(by='date_time_hourly')
-    full_data_sorted = full_data.sort_values(by='date_time_5min')
+    full_data_sorted = full_data.sort_values(by="date_time_5min")
 
     # return full_data
     return full_data_sorted
@@ -214,8 +292,8 @@ def get_last_n_days(n):
     Main function to gather and merge all inference data for n historical days
     in 5-minute frequency for generation mix data and 1-hour frequency resampled
     to 5-minute frequency for weather data.
-    
-    @param      n              Number of historical days 
+
+    @param      n              Number of historical days
     @return     last_n_days    Dataframe of generation mix and weather data for past n days
     """
     # 1. Get list of days representing the last n * 24 hours from current hour
@@ -225,26 +303,33 @@ def get_last_n_days(n):
     genmix_data = get_genmix_data(day_strings, n)
 
     # 3. Get weather data
-    api_key = '303ce611b884478ebc873437220703' # '8d0e4b3d61f149e095124908222101'
+    api_key = "303ce611b884478ebc873437220703"  # '8d0e4b3d61f149e095124908222101'
     weather_data = get_weather_data(start_date, end_date, api_key, n)
 
     # 4. Merge genmix and weather data
     last_n_days = merge_data(genmix_data, weather_data)
-    
+
     return last_n_days
 
 
 def test_model(model_path):
-    """ Tests model after retrain """
-    
+    """Tests model after retrain"""
+
     logging.info(f"Loading model: {model_path}")
     # Load train data
-    weather_vars = ["tempC","uvIndex","WindGustKmph","cloudcover","humidity","precipMM"]
+    weather_vars = [
+        "tempC",
+        "uvIndex",
+        "WindGustKmph",
+        "cloudcover",
+        "humidity",
+        "precipMM",
+    ]
     data = pd.read_csv("./X_train_california_2020-2021.csv")
 
-    try: 
+    try:
         model = load(model_path)
-        pred = model.predict(steps=1, exog = data[weather_vars])
+        pred = model.predict(steps=1, exog=data[weather_vars])
 
         return pred
     except Exception as e:

@@ -15,10 +15,10 @@ from utils import test_model
 app = FastAPI()
 
 origins = [
-    'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
-    'https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app',
-    'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/',
-    'http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app'
+    "https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/",
+    "https://sparc-cloud-run-hdyvu4kycq-uw.a.run.app",
+    "http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app/",
+    "http://sparc-cloud-run-hdyvu4kycq-uw.a.run.app",
 ]
 
 app.add_middleware(
@@ -30,6 +30,8 @@ app.add_middleware(
 )
 
 """ Class Definition Here? (store models in state)"""
+
+
 @app.get("/predict")
 def get_prediction():
     return {"result": predict()}
@@ -37,14 +39,16 @@ def get_prediction():
 
 @app.get("/")
 def read_root():
-    """ Root endpoint, TODO: display basic info (readme?) """
+    """Root endpoint, TODO: display basic info (readme?)"""
     return {"message": "Welcome from the API"}
 
 
 """ Example query param request """
+
+
 @app.get("/train/{param_str}")
 def train_models(param_str: str):
-    """ Experimental endpoint to retrain models, accepts param str """
+    """Experimental endpoint to retrain models, accepts param str"""
     logging.info(f"Recieved request for retrain with param_str: {param_str}")
     num_days = 30
     logging.info(f",,{param_str.count('days=')}")
@@ -54,15 +58,14 @@ def train_models(param_str: str):
     else:
         return {"result": "Enter correct days param"}
 
-    try: 
+    try:
         train(num_days)
-        
+
         return {"result": f"Retrain Successful!"}
     except Exception as e:
         logging.warning(e)
         return {"result": f"{e}"}
 
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8080)
-
-    
