@@ -12,9 +12,11 @@ Energy data is from the California Independent System Operator (CAISO) and weath
 
 ### Modeling:
 
-This is a time series forecasting problem where at every hour the features comprise the generation mix in MW per resource (solar, wind, geothermal, biomass, biogas, hydro, nuclear, batteres, imports, and other) and weather data (temperature, UV index, wind speed, cloud cover, humidity, and precipitation).
+This is a time series forecasting problem where at every hour the features comprise the generation mix in MW per resource (solar, wind, geothermal, biomass, biogas, hydro, nuclear, batteries, imports, and other) and weather data (temperature, UV index, wind speed, cloud cover, humidity, and precipitation).
 
-The output is the forecasted generation mix 24-hours ahead of time. We use an Skforecast model with XGBoost regressor.
+The output is the forecasted generation mix 24-hours ahead of time. We train 7 Skforecast models on aggregated energy source features (solar, wind, other_renewable (geothermal, biomass, biogas, and nuclear), hydro (small hydro and large hydro), batteries, and other (imports and other)) with an XGBoost regressor optimizing for MAPE.
+
+The forecasted generation mix is then used to compute CO<sub>2</sub> emissions by using the carbon intensity of each source. The model only accounts for use-phase emissions.
 
 ### Backend: 
 
@@ -33,10 +35,3 @@ Additionally, a cron-job scheduler initiates an hourly retrain step, which was s
 ### Frontend
 
 `frontend.py` contains the majority of the Streamlit code, calling `utils.py` when necessary. The frontend is publicly hosted at https://share.streamlit.io/ninaprakash1/sparc-forecasting/main/frontend.py.
-
-
-### Resources
-
-1. [Overleaf](https://www.overleaf.com/project/61e08b364ca87fbbf9d59f3a)
-2. [Existing scrapers from tamu](https://github.com/tamu-engineering-research/COVID-EMDA/tree/master/parser)
-3. [World Weather Online](https://www.worldweatheronline.com/developer/)
