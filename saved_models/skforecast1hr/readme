@@ -1,4 +1,0 @@
-renewable = ['Solar', 'Wind', 'Geothermal', 'Biomass', 'Biogas','Small hydro', 'Large Hydro', 'Nuclear']
-fossil_fuel = ['Coal', 'Natural Gas']   
-other = ['Batteries', 'Imports', 'Other']
-total = sum()
